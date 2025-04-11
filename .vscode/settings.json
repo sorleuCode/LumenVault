@@ -1,0 +1,6 @@
+{
+    
+    "solidity.remappings":["@openzeppelin/=/home/sorleu/DltAfrica_Web3/Final_Project/Lend-Link/contract/node_modules/@openzeppelin"] ,
+    "solidity.packageDefaultDependenciesContractsDirectory": "src",  
+    "solidity.packageDefaultDependenciesDirectory": "lib" 
+}
