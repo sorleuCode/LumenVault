@@ -32,27 +32,42 @@ const useCreateLoanRequest = () => {
       }
 
       try {
-        // Ensure the values are in BigInt format
         const amt = BigInt(amount);
         const interest = BigInt(maxInterestRate);
         const dur = BigInt(duration);
         const collateral = BigInt(collateralInWei);
 
-        const estimatedGas = await contract.requestLoan.estimateGas(
-          amt,
-          interest,
-          dur,
-          {
-            value: collateral
-          }
-        );
+        console.log("Sending loan request with params:", {
+          amount: amt.toString(),
+          maxInterestRate: interest.toString(),
+          duration: dur.toString(),
+          collateral: collateral.toString(),
+          contract: contract.target,
+          chainId,
+          user: address
+        });
+
+        let gasLimit;
+
+        try {
+          const estimatedGas = await contract.requestLoan.estimateGas(
+            amt,
+            interest,
+            dur,
+            { value: collateral }
+          );
+          gasLimit = (estimatedGas * BigInt(120)) / BigInt(100); // add 20% buffer
+        } catch (estimateErr) {
+          console.warn("Gas estimation failed. Falling back to static gas limit.");
+          gasLimit = BigInt(1_000_000); // fallback gas limit
+        }
 
         const tx = await contract.requestLoan(
           amt,
           interest,
           dur,
           {
-            gasLimit: (estimatedGas * BigInt(120)) / BigInt(100),
+            gasLimit,
             value: collateral
           }
         );
@@ -61,10 +76,10 @@ const useCreateLoanRequest = () => {
 
         if (receipt.status === 1) {
           toast.success("Loan requested successfully");
-          return;
+        } else {
+          toast.error("Transaction failed after sending");
         }
 
-        toast.error("Failed to request loan");
       } catch (error) {
         console.error("Raw error:", error);
 
