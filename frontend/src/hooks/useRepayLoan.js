@@ -4,7 +4,7 @@ import { useAppKitAccount, useAppKitNetwork } from "@reown/appkit/react";
 import { toast } from "react-toastify";
 import { ErrorDecoder } from "ethers-decode-error";
 import { Contract, parseUnits } from "ethers";
-import usdtTokenABI from "../ABI/lumenVault.json"
+import usdtTokenABI from "../ABI/usdtToken.json"
 import useSignerOrProvider from "./useSignerOrProvider";
 
 
