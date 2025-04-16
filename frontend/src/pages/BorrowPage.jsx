@@ -74,7 +74,7 @@ const BorrowPage = () => {
     };
 
     fetchRepayments();
-}, [userActiveLoans, getloanPayment]);
+}, []);
   
   // Replace the existing collateral calculation
   useEffect(() => {
