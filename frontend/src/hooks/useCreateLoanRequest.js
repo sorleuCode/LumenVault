@@ -32,22 +32,30 @@ const useCreateLoanRequest = () => {
       }
 
       try {
+        // Ensure the values are in BigInt format
+        const amt = BigInt(amount);
+        const interest = BigInt(maxInterestRate);
+        const dur = BigInt(duration);
+        const collateral = BigInt(collateralInWei);
+
         const estimatedGas = await contract.requestLoan.estimateGas(
-          amount,
-          maxInterestRate,
-          duration,
+          amt,
+          interest,
+          dur,
           {
-            value: collateralInWei
+            value: collateral
           }
         );
 
         const tx = await contract.requestLoan(
-            amount,
-            maxInterestRate,
-            duration, { 
-          gasLimit: (estimatedGas * BigInt(120)) / BigInt(100),
-          value: collateralInWei
-        });
+          amt,
+          interest,
+          dur,
+          {
+            gasLimit: (estimatedGas * BigInt(120)) / BigInt(100),
+            value: collateral
+          }
+        );
 
         const receipt = await tx.wait();
 
@@ -57,15 +65,19 @@ const useCreateLoanRequest = () => {
         }
 
         toast.error("Failed to request loan");
-        return;
       } catch (error) {
-        console.error(error);
-        
-        const errorDecoder = ErrorDecoder.create();
-        const decodedError = await errorDecoder.decode(error);
+        console.error("Raw error:", error);
 
-        console.error("Error requesting loan", decodedError);
-        toast.error("Loan request failed", decodedError);
+        try {
+          const errorDecoder = ErrorDecoder.create();
+          const decodedError = await errorDecoder.decode(error);
+          console.error("Decoded error:", decodedError);
+
+          toast.error(`Loan request failed: ${decodedError?.errorName || "Unknown error"}`);
+        } catch (decodeErr) {
+          console.error("Error decoding the error:", decodeErr);
+          toast.error("Loan request failed: Unknown issue");
+        }
       }
     },
     [contract, address, chainId]
