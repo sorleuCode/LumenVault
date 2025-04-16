@@ -17,7 +17,7 @@ const useRepayLoan = () => {
 
   const { signer } = useSignerOrProvider();
 
-  const usdtContract = new Contract(lumenVaultContractAddress, usdtTokenABI, signer);
+  const usdtContract = new Contract(usdtTokenContractAddress, usdtTokenABI, signer);
 
   return useCallback(
     async (loanId, repayment) => {
