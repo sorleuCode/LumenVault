@@ -54,7 +54,7 @@ const useRepayLoan = () => {
         // }
 
         const tx = await usdtContract.approve(lumenVaultContractAddress, parseUnits(stringRepayment, 18), {
-          gasLimit: BigInt(1000)
+          gasLimit: 10000
         });
 
         
@@ -69,7 +69,7 @@ const useRepayLoan = () => {
           // }
 
           const txLoan = await contract.repayLoanWithReward(loanId, {
-            gasLimit: BigInt(10000)
+            gasLimit: 10000
           });
 
           const trxReceipt = await txLoan.wait();
