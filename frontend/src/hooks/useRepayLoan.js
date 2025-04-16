@@ -30,6 +30,7 @@ const useRepayLoan = () => {
         return;
       }
 
+
       if (!address) {
         toast.error("Please connect your wallet");
         return;

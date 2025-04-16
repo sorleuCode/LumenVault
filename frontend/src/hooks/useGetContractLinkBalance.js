@@ -2,7 +2,7 @@ import { useCallback } from "react";
 import { useAppKitAccount, useAppKitNetwork } from "@reown/appkit/react";
 import { toast } from "react-toastify";
 import { ErrorDecoder } from "ethers-decode-error";
-import { Contract, formatUnits, parseUnits } from "ethers";
+import { Contract, formatUnits } from "ethers";
 import usdtTokenABI from "../ABI/usdtToken.json"
 import useSignerOrProvider from "./useSignerOrProvider";
 
