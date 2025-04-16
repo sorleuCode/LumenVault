@@ -43,33 +43,33 @@ const useRepayLoan = () => {
 
       try {
 
-        // const estimatedGas = await usdtTokenContractAddress?.approve?.estimateGas(
-        //   lumenVaultContractAddress,
-        //     parseUnits(stringRepayment, 18)
-        // );
+        const estimatedGas = await usdtTokenContractAddress?.approve?.estimateGas(
+          lumenVaultContractAddress,
+            parseUnits(stringRepayment, 18)
+        );
 
-        // if (!estimatedGas) {
-        //   toast.error("Gas estimation failed");
-        //   return;
-        // }
+        if (!estimatedGas) {
+          toast.error("Gas estimation failed");
+          return;
+        }
 
         const tx = await usdtContract.approve(lumenVaultContractAddress, parseUnits(stringRepayment, 18), {
-          gasLimit: 10000
+          gasLimit: (estimatedGas * BigInt(120)) / BigInt(100),
         });
 
         
         const trxReceipt = await tx.wait()
 
         if (trxReceipt.status === 1) {
-          // const estimatedGasLoan = await contract.repayLoanWithReward.estimateGas(loanId);
+          const estimatedGasLoan = await contract.repayLoanWithReward.estimateGas(loanId);
 
-          // if (!estimatedGasLoan) {
-          //   toast.error("Gas estimation for loan failed");
-          //   return;
-          // }
+          if (!estimatedGasLoan) {
+            toast.error("Gas estimation for loan failed");
+            return;
+          }
 
           const txLoan = await contract.repayLoanWithReward(loanId, {
-            gasLimit: 10000
+            gasLimit: (estimatedGasLoan * BigInt(120)) / BigInt(100),
           });
 
           const trxReceipt = await txLoan.wait();
