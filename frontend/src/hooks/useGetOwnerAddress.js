@@ -20,11 +20,7 @@ const useGetOwnerAddress = () => {
         return;
       }
 
-      if (Number(chainId) !== Number(baseSepolia.id)) {
-        toast.error("You're not connected to baseSepolia");
-        return;
-      }
-
+     
       try {
 
         

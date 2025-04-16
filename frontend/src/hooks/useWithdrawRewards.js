@@ -2,7 +2,6 @@ import { useCallback, useState } from "react";
 import useContractInstance from "./useContractInstance";
 import { useAppKitAccount, useAppKitNetwork } from "@reown/appkit/react";
 import { toast } from "react-toastify";
-import { baseSepolia } from "@reown/appkit/networks";
 import { ErrorDecoder } from "ethers-decode-error";
 
 const useWithdrawRewards = () => {
@@ -23,11 +22,7 @@ const useWithdrawRewards = () => {
         return;
       }
 
-      if (Number(chainId) !== Number(baseSepolia.id)) {
-        toast.error("You're not connected to baseSepolia");
-        return;
-      }
-
+    
       try {
 
         

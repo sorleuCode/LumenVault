@@ -1,22 +1,34 @@
-import { useCallback } from 'react'
+import { useCallback } from "react";
 import useContractInstance from "./useContractInstance";
-import { parseUnits, formatEther } from 'ethers'
+import { parseUnits, formatUnits } from "ethers";
 
 export function useCollateralCalculator() {
-  const contract =useContractInstance(false);
+  const contract = useContractInstance(false);
 
-  const calculateCollateral = useCallback(async (linkAmount) => {
-    try {
-      const amountInWei = parseUnits(linkAmount.toString(), 18)
-      const collateralWei = await contract.getrequiredCollateralAmount(amountInWei)
-      
+  const calculateCollateral = useCallback(
+    async (usdtAmount) => {
+      if (!contract) {
+        throw new Error("Contract not initialized");
+      }
 
-      return formatEther(collateralWei)
-    } catch (error) {
-      console.error('Error calculating collateral:', error)
-      throw error
-    }
-  }, [contract])
+      try {
+        const amountInWei = parseUnits(usdtAmount.toString(), 18);
+        console.log("Input amountInWei:", amountInWei.toString());
 
-  return calculateCollateral
+        const collateralWei = await contract.getRequiredCollateralAmount(amountInWei);
+        console.log("Raw collateralWei:", collateralWei.toString());
+
+        const collateralFormatted = formatUnits(collateralWei, 18); // Assuming PTT has 18 decimals
+        console.log("Formatted collateral:", collateralFormatted);
+
+        return collateralFormatted;
+      } catch (error) {
+        console.error("Error calculating collateral:", error);
+        throw error;
+      }
+    },
+    [contract]
+  );
+
+  return calculateCollateral;
 }

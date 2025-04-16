@@ -1,32 +1,57 @@
 import { createAppKit } from "@reown/appkit/react";
 import { EthersAdapter } from "@reown/appkit-adapter-ethers";
-import { baseSepolia, sepolia } from "@reown/appkit/networks";
+import { defineChain } from "@reown/appkit/networks";
 
-// 1. Get projectId
+// Your project ID from environment variable
 const projectId = import.meta.env.VITE_APPKIT_PROJECT_ID;
 
-// 2. Set the networks
-const networks = [baseSepolia, sepolia];
+console.log({ projectId });
 
-// 3. Create a metadata object - optional
+// Updated RPC config to go through Vite proxy
+const pharosDevnet = defineChain({
+  id: 50002,
+  caipNetworkId: "eip155:50002",
+  chainNamespace: "eip155",
+  name: "Pharos Devnet",
+  nativeCurrency: {
+    decimals: 18,
+    name: "MKT",
+    symbol: "MKT",
+  },
+  rpcUrls: {
+    default: {
+      http: ["http://localhost:5173/rpc"], // 👈 Proxy path to avoid CORS
+    },
+  },
+  blockExplorers: {
+    default: {
+      name: "Pharos Scan",
+      url: "https://pharosscan.xyz/",
+    },
+  },
+  contracts: {
+    // Add the contracts here if needed
+  },
+});
+
+// List of supported networks
+const networks = [pharosDevnet];
+
+// Optional metadata for wallet connection UI
 const metadata = {
   name: "My Website",
   description: "My Website description",
-  url: "https://mywebsite.com", // origin must match your domain & subdomain
+  url: "https://mywebsite.com",
   icons: ["https://avatars.mywebsite.com/"],
 };
 
-// 4. Create a AppKit instance
+// Create AppKit instance with config
 createAppKit({
   adapters: [new EthersAdapter()],
   networks,
   metadata,
   projectId,
-  themeVariables: {
-    // "--w3m-accent": "#d97706",
-    "--w3m-border-radius-master": "1px",
-  },
   features: {
-    analytics: true, // Optional - defaults to your Cloud configuration
+    analytics: true, // Optional
   },
 });

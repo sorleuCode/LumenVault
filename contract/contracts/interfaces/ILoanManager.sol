@@ -3,8 +3,7 @@ pragma solidity ^0.8.24;
 
 interface ILoanManager {
     enum InterestRateType { FIXED, VARIABLE }
-
-    event LoanRequested(uint256 indexed loanId, address borrower, uint256 amount, uint256 collateral,uint256 maxInterestRate,uint256 duration);
+    event LoanRequested(uint256 indexed loanId, address borrower, uint256 amount, uint256 collateral, uint256 maxInterestRate, uint256 duration);
     event LoanFunded(uint256 indexed loanId, address indexed lender);
     event LoanRepaid(uint256 indexed loanId, address indexed borrower, uint256 amount);
     event PartialRepayment(uint256 indexed loanId, address indexed borrower, uint256 amount);
@@ -17,13 +16,6 @@ interface ILoanManager {
     event RewardsWithdrawn(address owner, uint256 contractBalance);
     event LoanLiquidated(uint256 indexed loanId, address indexed lender, uint256 loanAmount);
 
-
-
-    function requestLoan(
-        uint256 amount,
-        uint256 maxInterestRate,
-        uint256 duration
-    ) external payable;
-
+    function requestLoan(uint256 amount, uint256 maxInterestRate, uint256 duration) external;
     function makePartialRepayment(uint256 loanId, uint256 amount) external;
 }

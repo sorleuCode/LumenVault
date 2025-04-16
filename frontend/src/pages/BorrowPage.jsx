@@ -167,7 +167,9 @@ const BorrowPage = () => {
      
       // Create the loan request transaction
 
-      const collateralInWei = parseEther(collateralAmount.toString()) // Assuming collateralAmount is in ETH
+      console.log({collateralAmount});
+
+      const collateralInWei = parseUnits(collateralAmount.toString(), 18);
 
       await createLoanRequest(amountInWei, interestRateScaled, formData.duration, collateralInWei)
 
@@ -286,7 +288,7 @@ const BorrowPage = () => {
                     }}
                   >
                     <option>
-                      LINK
+                      USDT
                     </option>
                   </select>
                   <div className="flex-1 flex gap-2">
@@ -374,12 +376,12 @@ const BorrowPage = () => {
                     }}
                   >
                     <option >
-                      ETH
+                      PTT
                     </option>
 
                   </select>
                   <div className="text-lg text-gray-300 flex-1">
-                    Required: {parseFloat(collateralAmount).toFixed(4)} ETH
+                    Required: {parseFloat(collateralAmount).toFixed(4)} PTT
                   </div>
 
                 </div>
@@ -415,7 +417,7 @@ const BorrowPage = () => {
                   <div className="flex justify-between text-sm text-gray-400">
                     <span>Collateral</span>
                     <span>
-                      {parseFloat(collateralAmount).toFixed(4)} ETH
+                      {parseFloat(collateralAmount).toFixed(4)} PTT
                     </span>
                   </div>
 

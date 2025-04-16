@@ -4,7 +4,6 @@ pragma solidity ^0.8.24;
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/Pausable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/shared/interfaces/AggregatorV3Interface.sol";
 import "./interfaces/ILoanManager.sol";
 import "./libraries/CollateralUtils.sol";
 import "./libraries/CollateralRegistry.sol";
@@ -14,19 +13,23 @@ import "./storage/LoanStorage.sol";
 contract LoanManager is ILoanManager, LoanStorage, ReentrancyGuard, Pausable {
     using CollateralUtils for uint256;
 
-    IERC20 public linkToken; // $LINK as the loan currency
-    AggregatorV3Interface public priceFeed; // ETH price feed
+    IERC20 public usdtToken; // Mock USDT as the loan currency
+    IERC20 public pttToken;  // PTT as the collateral token (ERC-20 at 0xcB8a4dF93DEB878ae10044E37Ffc1ea7450630b8)
     address public owner;
 
-    uint256 public collateralizationRatio = 120;
+    uint256 public pttUsdtPrice; // Manual PTT/USDT price (used 1 PTT = 0.05 USDT)
+    uint8 public priceDecimals = 18; // Fixed decimals for manual price feed
+
+    uint256 public collateralizationRatio = 120; // 120%
     uint256 public liquidationThreshold = 110; // 110%
     uint256 public loanCounter;
-    uint256 public minLoanAmount = 10**18;
-    uint256 public maxLoanAmount = 100_000 * 10**18;
+    uint256 public minLoanAmount = 10**18; // 1 USDT
+    uint256 public maxLoanAmount = 100_000 * 10**18; // 100K USDT
 
-    constructor(IERC20 _linkToken, AggregatorV3Interface _priceFeed) {
-        linkToken = _linkToken;
-        priceFeed = _priceFeed;
+    constructor(IERC20 _usdtToken, IERC20 _pttToken, uint256 _initialPttUsdtPrice) {
+        usdtToken = _usdtToken;
+        pttToken = _pttToken;
+        pttUsdtPrice = _initialPttUsdtPrice;
         owner = msg.sender;
     }
 
@@ -35,22 +38,29 @@ contract LoanManager is ILoanManager, LoanStorage, ReentrancyGuard, Pausable {
         _;
     }
 
+    function updatePttUsdtPrice(uint256 _newPrice) external onlyOwner {
+        pttUsdtPrice = _newPrice;
+        emit PriceUpdated(_newPrice);
+    }
+
+    event PriceUpdated(uint256 newPrice);
+
+    function getPTTPrice() public view returns (uint256) {
+        require(pttUsdtPrice > 0, "Price not set");
+        return pttUsdtPrice;
+    }
+
     function requestLoan(
         uint256 amount,
         uint256 maxInterestRate,
         uint256 duration
-    ) external payable override whenNotPaused nonReentrant {
-        require(
-            amount >= minLoanAmount && amount <= maxLoanAmount,
-            "Invalid loan amount"
-        );
+    ) external override whenNotPaused nonReentrant {
+        require(amount >= minLoanAmount && amount <= maxLoanAmount, "Invalid loan amount");
 
+        uint256 pttPrice = getPTTPrice();
+        uint256 requiredCollateral = amount.calculateRequiredCollateral(pttPrice, collateralizationRatio, priceDecimals);
 
-        uint256 ethPrice = getETHPrice();
-
-        uint256 requiredCollateral = amount.calculateRequiredCollateral(ethPrice, collateralizationRatio, priceFeed.decimals());
-
-        require(msg.value >= requiredCollateral, "Insufficient collateral");
+        require(pttToken.transferFrom(msg.sender, address(this), requiredCollateral), "Collateral transfer failed");
 
         loanCounter++;
 
@@ -65,7 +75,7 @@ contract LoanManager is ILoanManager, LoanStorage, ReentrancyGuard, Pausable {
             borrower: msg.sender,
             lender: address(0),
             amount: amount,
-            collateral: msg.value,
+            collateral: requiredCollateral,
             interestRate: maxInterestRate,
             rateType: InterestRateType.FIXED,
             duration: duration
@@ -74,51 +84,34 @@ contract LoanManager is ILoanManager, LoanStorage, ReentrancyGuard, Pausable {
         borrowerLoans[msg.sender].push(loanCounter);
         tryAutomaticMatch(loanCounter);
 
-        emit LoanRequested(loanCounter, msg.sender, amount, msg.value, maxInterestRate, duration);
+        emit LoanRequested(loanCounter, msg.sender, amount, requiredCollateral, maxInterestRate, duration);
     }
 
     function fundLoan(uint256 loanId) external whenNotPaused nonReentrant {
         LoanCore storage loan = loansCore[loanId];
         LoanStatus storage status = loansStatus[loanId];
 
-        // Ensure the loan is not already active
         require(!status.active, "Loan already active");
         require(loan.lender == address(0), "Loan already funded");
-        require(
-            linkToken.allowance(msg.sender, address(this)) >= loan.amount,
-            "Insufficient allowance for this user"
-        );
+        require(usdtToken.allowance(msg.sender, address(this)) >= loan.amount, "Insufficient allowance");
 
-        // Transfer the loan amount from lender to the contract
-        require(
-            linkToken.transferFrom(msg.sender, address(this), loan.amount),
-            "Transfer failed"
-        );
+        require(usdtToken.transferFrom(msg.sender, address(this), loan.amount), "Transfer failed");
 
-        // Mark the loan as funded and active
         loan.lender = msg.sender;
         status.startTime = block.timestamp;
         status.active = true;
 
-        // Disburse the loan amount to the borrower
-        require(
-            linkToken.transfer(loan.borrower, loan.amount),
-            "Loan disbursement failed"
-        );
+        require(usdtToken.transfer(loan.borrower, loan.amount), "Loan disbursement failed");
 
-        // Record the loan in the lender's and borrower's loan records
         lenderLoans[msg.sender].push(loanId);
         borrowerLoans[loan.borrower].push(loanId);
         AllLoansID.push(loanId);
 
         emit LoanFunded(loanId, msg.sender);
-        emit LoanDisbursed(loanId, loan.borrower, loan.amount); // New event to indicate loan disbursement
+        emit LoanDisbursed(loanId, loan.borrower, loan.amount);
     }
 
-    function makePartialRepayment(
-        uint256 loanId,
-        uint256 amount
-    ) external override whenNotPaused nonReentrant {
+    function makePartialRepayment(uint256 loanId, uint256 amount) external override whenNotPaused nonReentrant {
         LoanCore storage loan = loansCore[loanId];
         LoanStatus storage status = loansStatus[loanId];
         LoanInterest storage interest = loansInterest[loanId];
@@ -126,39 +119,28 @@ contract LoanManager is ILoanManager, LoanStorage, ReentrancyGuard, Pausable {
         require(status.active, "Loan not active");
         require(msg.sender == loan.borrower, "Not borrower");
 
-        // Accrue interest before repayment to ensure interest is up-to-date
         accrueInterest(loanId);
 
         uint256 totalInterest = interest.accruedInterest;
-        uint256 totalRepayment = loan.amount +
-            totalInterest -
-            status.repaidAmount;
+        uint256 totalRepayment = loan.amount + totalInterest - status.repaidAmount;
 
         require(amount <= totalRepayment, "Repayment exceeds owed amount");
 
-        // Transfer repayment amount from borrower to lender
-        require(
-            linkToken.transferFrom(msg.sender, loan.lender, amount),
-            "Partial repayment failed"
-        );
+        require(usdtToken.transferFrom(msg.sender, loan.lender, amount), "Partial repayment failed");
 
-        // Update loan repayment status
         status.repaidAmount += amount;
 
-        // Check if loan is fully repaid
         if (status.repaidAmount >= totalRepayment) {
             status.repaid = true;
             status.active = false;
-            returnCollateral(loanId); // Return collateral to borrower
+            returnCollateral(loanId);
         }
 
         emit PartialRepayment(loanId, msg.sender, amount);
     }
 
     function allowanceCaller() external view returns (uint256) {
-        uint256 allowance = linkToken.allowance(msg.sender, address(this));
-
-        return allowance;
+        return usdtToken.allowance(msg.sender, address(this));
     }
 
     function accrueInterest(uint256 loanId) internal {
@@ -168,35 +150,28 @@ contract LoanManager is ILoanManager, LoanStorage, ReentrancyGuard, Pausable {
 
         require(status.active, "Loan not active");
 
-        // Calculate time elapsed since the last accrual
         uint256 timeElapsed;
         if (interest.lastInterestAccrualTimestamp == 0) {
-            timeElapsed = loan.duration; // Use the loan duration if no prior accrual
+            timeElapsed = loan.duration;
         } else {
-            timeElapsed =
-                block.timestamp -
-                interest.lastInterestAccrualTimestamp;
+            timeElapsed = block.timestamp - interest.lastInterestAccrualTimestamp;
         }
 
         require(timeElapsed > 0, "No time elapsed for interest accrual");
 
-        // Calculate accrued interest using the elapsed time
         uint256 accrued = LoanCalculator.calculatePeriodicInterest(
             loan.amount,
             loan.interestRate,
             timeElapsed
         );
 
-        // Update accrued interest and timestamp
         interest.accruedInterest += accrued;
         interest.lastInterestAccrualTimestamp = block.timestamp;
 
         emit InterestAccrued(loanId, accrued);
     }
 
-    function repayLoanWithReward(
-        uint256 loanId
-    ) external whenNotPaused nonReentrant {
+    function repayLoanWithReward(uint256 loanId) external whenNotPaused nonReentrant {
         LoanCore storage loan = loansCore[loanId];
         LoanStatus storage status = loansStatus[loanId];
         LoanInterest storage interest = loansInterest[loanId];
@@ -204,89 +179,107 @@ contract LoanManager is ILoanManager, LoanStorage, ReentrancyGuard, Pausable {
         require(status.active, "Loan not active");
         require(msg.sender == loan.borrower, "Not borrower");
 
-        // First, accrue interest before repayment
-         accrueInterest(loanId); // This will calculate and update interest first
+        accrueInterest(loanId);
 
-        // Calculate the total interest accrued so far
         uint256 totalInterest = interest.accruedInterest;
+        require(totalInterest > 0, "No interest accrued!");
 
-        require(totalInterest > 0, "no interest accrued!");
+        uint256 reward = (totalInterest * 20) / 100;
+        uint256 lenderInterest = totalInterest - reward;
 
-        // Deduct the total interest from the repayment amount
-        uint256 reward = (totalInterest * 20) / 100; // 20% of interest as reward
-        uint256 lenderInterest = totalInterest - reward; // Remaining interest for lender
+        interest.lastInterestAccrualTimestamp = block.timestamp;
 
-        // Update accrued interest and timestamps
-        interest.lastInterestAccrualTimestamp = block.timestamp; // Update timestamp
-
-        // Calculate total repayment (principal + remaining interest - already repaid)
-        uint256 totalRepayment = loan.amount +
-            totalInterest -
-            status.repaidAmount;
+        uint256 totalRepayment = loan.amount + totalInterest - status.repaidAmount;
 
         require(totalRepayment > loan.amount, "Interest not calculated");
         require(reward > 0, "No reward calculated");
 
-        require(
-            linkToken.transferFrom(msg.sender, address(this), totalRepayment),
-            "Transfer failed"
-        );
+        require(usdtToken.transferFrom(msg.sender, address(this), totalRepayment), "Transfer failed");
 
-        // Transfer lender's share (principal + lender's portion of interest)
         uint256 amountToLender = loan.amount + lenderInterest;
-        require(
-            linkToken.transfer(loan.lender, amountToLender),
-            "Transfer to lender failed"
-        );
+        require(usdtToken.transfer(loan.lender, amountToLender), "Transfer to lender failed");
 
-        // Update loan status
-        status.repaidAmount += totalRepayment; // Add repayment to the total
-        status.active = false; // Mark loan as fully repaid
+        status.repaidAmount += totalRepayment;
+        status.active = false;
         status.repaid = true;
         status.defaulted = false;
 
-        // Return collateral to borrower
         returnCollateral(loanId);
 
         emit LoanRepaid(loanId, msg.sender, totalRepayment);
-        emit RewardCollected(loanId, reward); // Emit reward collection event
+        emit RewardCollected(loanId, reward);
     }
 
-    function liquidateOverdueLoan(
-        uint256 loanId
-    ) external whenNotPaused nonReentrant {
+
+
+     function getTotalLoanPayment(uint256 loanId) public view returns (uint256 totalPayment, uint256 principal, uint256 interestAmount) {
         LoanCore storage loan = loansCore[loanId];
         LoanStatus storage status = loansStatus[loanId];
+        LoanInterest storage interest = loansInterest[loanId];
 
-        require(status.active, "Loan not active");
-        require(block.timestamp > loan.duration, "Loan not overdue");
-        require(!status.repaid, "Loan already repaid");
+        require(loan.amount > 0, "Loan does not exist");
 
-        // Transfer the Ether collateral to the lender
-        transferCollateralToLender(loanId);
+        principal = loan.amount;
 
-        // Mark the loan as defaulted and inactive
-        status.active = false;
-        status.defaulted = true;
+        if (!status.active && status.repaid) {
+            return (status.repaidAmount, principal, status.repaidAmount - principal);
+        }
 
-        emit LoanLiquidated(loanId, loan.lender, loan.amount);
+        uint256 timeElapsed;
+        if (status.active) {
+            if (interest.lastInterestAccrualTimestamp == 0) {
+                timeElapsed = block.timestamp - status.startTime;
+            } else {
+                timeElapsed = block.timestamp - interest.lastInterestAccrualTimestamp;
+            }
+
+            uint256 additionalInterest = LoanCalculator.calculatePeriodicInterest(
+                loan.amount,
+                loan.interestRate,
+                timeElapsed
+            );
+
+            interestAmount = interest.accruedInterest + additionalInterest;
+        } else {
+            interestAmount = interest.accruedInterest;
+        }
+
+        totalPayment = principal + interestAmount - status.repaidAmount;
+
+        return (totalPayment, principal, interestAmount);
     }
 
-    function transferCollateralToLender(uint256 loanId) internal {
-        LoanCore storage loan = loansCore[loanId];
+    function liquidateOverdueLoan(uint256 loanId) external whenNotPaused nonReentrant {
+    LoanCore storage loan = loansCore[loanId];
+    LoanStatus storage status = loansStatus[loanId];
+    LoanRequest storage request = loanRequests[loanId];
 
-        // Ensure the contract holds sufficient Ether as collateral
-        require(
-            address(this).balance >= loan.collateral,
-            "Insufficient collateral balance"
-        );
+    require(status.active, "Loan not active");
+    require(block.timestamp > request.dueDate, "Loan not overdue");
+    require(!status.repaid, "Loan already repaid");
 
-        // Mark lender address as payable and transfer the collateral (Ether)
-        address payable lenderPayable = payable(loan.lender);
-        (bool success, ) = lenderPayable.call{value: loan.collateral}("");
+    (uint256 debt, , ) = getTotalLoanPayment(loanId); // USDT owed
+    uint256 collateralValue = (loan.collateral * pttUsdtPrice) / (10 ** priceDecimals); // USDT value of PTT
+    require(debt > (collateralValue * liquidationThreshold) / 100, "Collateral still sufficient");
 
-        require(success, "Collateral transfer failed");
-    }
+    transferCollateralToLender(loanId);
+
+    status.active = false;
+    status.defaulted = true;
+
+    emit LoanLiquidated(loanId, loan.lender, loan.collateral); // Emit collateral amount
+}
+
+
+function transferCollateralToLender(uint256 loanId) internal {
+    LoanCore storage loan = loansCore[loanId];
+    uint256 amount = loan.collateral;
+
+    loan.collateral = 0; // Reset collateral
+    require(pttToken.transfer(loan.lender, amount), "Collateral transfer failed");
+}
+
+   
 
     function returnCollateral(uint256 loanId) internal {
         LoanCore storage loan = loansCore[loanId];
@@ -294,45 +287,29 @@ contract LoanManager is ILoanManager, LoanStorage, ReentrancyGuard, Pausable {
 
         if (amount > 0) {
             loan.collateral = 0;
-            (bool sent, ) = payable(loan.borrower).call{value: amount}("");
-            require(sent, "Collateral transfer failed");
+            require(pttToken.transfer(loan.borrower, amount), "Collateral transfer failed");
         }
     }
 
-    function getETHPrice() public view returns (uint256) {
-        (, int256 price, , , ) = priceFeed.latestRoundData();
-        require(price > 0, "Invalid price");
-        return uint256(price);
-    }
-
     function withdrawRewards(address _owner) external onlyOwner nonReentrant {
-        uint256 contractBalance = linkToken.balanceOf(address(this));
+        uint256 contractBalance = usdtToken.balanceOf(address(this));
         require(contractBalance > 0, "No rewards to withdraw");
 
-        require(
-            linkToken.transfer(_owner, contractBalance),
-            "Reward withdrawal failed"
-        );
+        require(usdtToken.transfer(_owner, contractBalance), "Reward withdrawal failed");
 
         emit RewardsWithdrawn(_owner, contractBalance);
     }
 
     function tryAutomaticMatch(uint256 loanId) internal {
-        LoanRequest storage request = loanRequests[loanId];
+        LoanRequest storage request = loanRequests[loanCounter];
         address bestLender;
         uint256 bestRate = type(uint256).max;
 
         for (uint256 i = 0; i < AllLoansID.length; i++) {
             address lender = address(uint160(AllLoansID[i]));
             if (lenderAvailableFunds[lender] >= request.amount) {
-                uint256 offeredRate = getLenderOfferedRate(
-                    lender,
-                    request.amount
-                );
-                if (
-                    offeredRate <= request.maxInterestRate &&
-                    offeredRate < bestRate
-                ) {
+                uint256 offeredRate = getLenderOfferedRate(lender, request.amount);
+                if (offeredRate <= request.maxInterestRate && offeredRate < bestRate) {
                     bestLender = lender;
                     bestRate = offeredRate;
                 }
@@ -344,51 +321,27 @@ contract LoanManager is ILoanManager, LoanStorage, ReentrancyGuard, Pausable {
         }
     }
 
-    function getrequiredCollateralAmount(uint256 loanAmount) external view returns(uint256) {
-
-        uint256 ethPrice = getETHPrice();
-
-
-        return loanAmount.calculateRequiredCollateral(ethPrice, collateralizationRatio, priceFeed.decimals());
-
+    function getRequiredCollateralAmount(uint256 loanAmount) external view returns (uint256) {
+        uint256 pttPrice = getPTTPrice();
+        return loanAmount.calculateRequiredCollateral(pttPrice, collateralizationRatio, priceDecimals);
     }
 
-
-
-    function getLenderOfferedRate(
-        address lender,
-        uint256 amount
-    ) internal view returns (uint256) {
-        // Fetch lender's available funds
+    function getLenderOfferedRate(address lender, uint256 amount) internal view returns (uint256) {
         uint256 availableFunds = lenderAvailableFunds[lender];
-
-        // Ensure the lender has enough funds to cover the requested amount
         require(availableFunds >= amount, "Insufficient lender funds");
 
-        // Calculate the utilization rate (percentage of available funds requested)
         uint256 utilizationRate = (amount * 100) / availableFunds;
+        uint256 baseRate = 2;
+        uint256 maxRate = 20;
 
-        // Use utilization rate to determine the offered rate
-        // This logic can be customized based on your lending protocol
-        // For simplicity, let's assume a direct correlation
-        uint256 baseRate = 2; // e.g., 5% base rate
-        uint256 maxRate = 20; // e.g., 20% maximum rate
-
-        // Higher utilization results in a higher offered rate, capped at maxRate
-        uint256 offeredRate = baseRate +
-            ((utilizationRate * (maxRate - baseRate)) / 100);
+        uint256 offeredRate = baseRate + ((utilizationRate * (maxRate - baseRate)) / 100);
         if (offeredRate > maxRate) {
-            offeredRate = maxRate; // Ensure rate does not exceed maxRate
+            offeredRate = maxRate;
         }
-
         return offeredRate;
     }
 
-    function createMatchedLoan(
-        uint256 loanId,
-        address lender,
-        uint256 rate
-    ) internal {
+    function createMatchedLoan(uint256 loanId, address lender, uint256 rate) internal {
         LoanCore storage loan = loansCore[loanId];
         loan.lender = lender;
         loan.interestRate = rate;
@@ -402,76 +355,21 @@ contract LoanManager is ILoanManager, LoanStorage, ReentrancyGuard, Pausable {
         collateralizationRatio = newRatio;
     }
 
-    function updateLiquidationThreshold(
-        uint256 newThreshold
-    ) external onlyOwner {
+    function updateLiquidationThreshold(uint256 newThreshold) external onlyOwner {
         require(newThreshold >= 100, "Threshold too low");
         liquidationThreshold = newThreshold;
     }
 
-    function setLoanLimits(
-        uint256 _minLoanAmount,
-        uint256 _maxLoanAmount
-    ) external onlyOwner {
-        require(
-            _minLoanAmount > 0,
-            "Minimum loan amount must be greater than 0"
-        );
-        require(
-            _maxLoanAmount > _minLoanAmount,
-            "Maximum loan amount must be greater than minimum loan amount"
-        );
+    function setLoanLimits(uint256 _minLoanAmount, uint256 _maxLoanAmount) external onlyOwner {
+        require(_minLoanAmount > 0, "Minimum loan amount must be greater than 0");
+        require(_maxLoanAmount > _minLoanAmount, "Maximum loan amount must be greater than minimum loan amount");
         minLoanAmount = _minLoanAmount;
         maxLoanAmount = _maxLoanAmount;
     }
 
-    function getTotalLoanPayment(uint256 loanId) external view returns (uint256 totalPayment, uint256 principal, uint256 interestAmount) {
-        LoanCore storage loan = loansCore[loanId];
-        LoanStatus storage status = loansStatus[loanId];
-        LoanInterest storage interest = loansInterest[loanId];
+   
 
-        require(loan.amount > 0, "Loan does not exist");
-        
-        principal = loan.amount;
-        
-        // If loan is not active and already repaid, return the actual amounts paid
-        if (!status.active && status.repaid) {
-            return (status.repaidAmount, principal, status.repaidAmount - principal);
-        }
-        
-        // Calculate time elapsed since loan start or last interest accrual
-        uint256 timeElapsed;
-        if (status.active) {
-            if (interest.lastInterestAccrualTimestamp == 0) {
-                timeElapsed = block.timestamp - status.startTime;
-            } else {
-                timeElapsed = block.timestamp - interest.lastInterestAccrualTimestamp;
-            }
-            
-            // Calculate additional interest since last accrual
-            uint256 additionalInterest = LoanCalculator.calculatePeriodicInterest(
-                loan.amount,
-                loan.interestRate,
-                timeElapsed
-            );
-            
-            
-            interestAmount = interest.accruedInterest + additionalInterest;
-        } else {
-            interestAmount = interest.accruedInterest;
-        }
-        
-        totalPayment = principal + interestAmount - status.repaidAmount;
-        
-        return (totalPayment, principal, interestAmount);
-    }
-
-    function getAllLoanRequests()
-        external
-        view
-        returns (LoanRequestDetail[] memory)
-    {
-        // First pass to count valid requests
+    function getAllLoanRequests() external view returns (LoanRequestDetail[] memory) {
         uint256 validCount = 0;
         for (uint256 i = 1; i <= loanCounter; i++) {
             LoanRequest memory request = loanRequests[i];
@@ -480,13 +378,9 @@ contract LoanManager is ILoanManager, LoanStorage, ReentrancyGuard, Pausable {
             }
         }
 
-        // Create array with exact size
-        LoanRequestDetail[] memory details = new LoanRequestDetail[](
-            validCount
-        );
+        LoanRequestDetail[] memory details = new LoanRequestDetail[](validCount);
         uint256 currentIndex = 0;
 
-        // Second pass to populate array
         for (uint256 i = 1; i <= loanCounter; i++) {
             LoanRequest memory request = loanRequests[i];
             LoanStatus memory status = loansStatus[i];

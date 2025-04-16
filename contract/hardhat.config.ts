@@ -1,33 +1,25 @@
-import { HardhatUserConfig, vars } from "hardhat/config";
+import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
+require("dotenv").config();
 
+interface ExtendedHardhatUserConfig extends HardhatUserConfig {
+  pharosscan?: {
+    apiurl: string;
+  };
+}
 
-const ALCHEMY_API_KEY = vars.get("ALCHEMY_API_KEY");
-const BASESCAN_API_KEY = vars.get("BASESCAN_API_KEY");
-
-
-const config: HardhatUserConfig = {
+const config: ExtendedHardhatUserConfig = {
   solidity: "0.8.24",
   networks: {
-    baseSepolia: {
-      url: `https://base-sepolia.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
-      accounts: vars.has("PRIVATE_KEY") ? [vars.get("PRIVATE_KEY")] : []
+    pharos: {
+      url: "https://devnet.dplabs-internal.com/",
+      accounts: [process.env.WALLET_PRIVATE_KEY || ""],
+      chainId: 50002
     },
   },
-  
-  etherscan: {
-    apiKey: BASESCAN_API_KEY,
-    customChains: [
-      {
-        network: "baseSepolia",
-        chainId: 84532,
-        urls: {
-          apiURL: "https://api-sepolia.basescan.org/api",
-          browserURL: "https://sepolia.basescan.org",
-        },
-    },
-],
-},
+  pharosscan: {
+    apiurl: "https://pharosscan.xyz/",
+  },
 };
 
 export default config;

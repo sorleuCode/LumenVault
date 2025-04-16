@@ -1,11 +1,9 @@
 import { useCallback } from "react";
-import useContractInstance from "./useContractInstance";
 import { useAppKitAccount, useAppKitNetwork } from "@reown/appkit/react";
 import { toast } from "react-toastify";
-import { baseSepolia } from "@reown/appkit/networks";
 import { ErrorDecoder } from "ethers-decode-error";
 import { Contract, formatUnits, parseUnits } from "ethers";
-import linkTokenABI from "../ABI/linkToken.json"
+import usdtTokenABI from "../ABI/usdtToken.json"
 import useSignerOrProvider from "./useSignerOrProvider";
 
 
@@ -13,12 +11,11 @@ const useGetContractLinkBalance = () => {
   const { address } = useAppKitAccount();
   const { chainId } = useAppKitNetwork();
   const { readOnlyProvider } = useSignerOrProvider()
-  const linkTokenContractAddress = import.meta.env.VITE_LINK_TOKEN_CONTRACT_ADDRESS;
-  const lendLinkContractAddress = import.meta.env.VITE_LEND_LINK_CONTRACT_ADDRESS
+  const usdtTokenContractAddress = import.meta.env.VITE_USDT_TOKEN_CONTRACT_ADDRESS;
 
 
 
-  const linkContract = new Contract(linkTokenContractAddress, linkTokenABI, readOnlyProvider);
+  const usdtTokenContract = new Contract(usdtTokenContractAddress, usdtTokenABI, readOnlyProvider);
 
   return useCallback(
     async () => {
@@ -29,21 +26,17 @@ const useGetContractLinkBalance = () => {
       //   return;
       // }
 
-      if (!linkContract) {
+      if (!usdtTokenContract) {
         toast.error("Contract not found");
         return;
       }
 
-      if (Number(chainId) !== Number(baseSepolia.id)) {
-        toast.error("You're not connected to baseSepolia");
-        return;
-      }
 
       try {
 
 
 
-        const contractLinkBalance = await linkContract.balanceOf(String(lendLinkContractAddress).toString());
+        const contractLinkBalance = await usdtTokenContract.balanceOf(String(usdtTokenContractAddress).toString());
 
             console.log({contractLinkBalance})
             return formatUnits(String(contractLinkBalance), 18)
@@ -60,7 +53,7 @@ const useGetContractLinkBalance = () => {
         toast.error("error fetching balance", decodedError);
       }
     },
-    [ address, chainId, linkContract]
+    [ address, chainId, usdtTokenContract]
   );
 };
 

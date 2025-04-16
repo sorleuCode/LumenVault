@@ -3,7 +3,7 @@ import { Contract } from "ethers"
 import useContractInstance from "./useContractInstance"
 import { toast } from "react-toastify"
 
-const LINK_TOKEN_ABI = ["function approve(address spender, uint256 amount) public returns (bool)"]
+const usdtTokenABI = ["function approve(address spender, uint256 amount) public returns (bool)"]
 
 export const useApproveLinkToken = () => {
   const [isApproving, setIsApproving] = useState(false)
@@ -17,11 +17,11 @@ export const useApproveLinkToken = () => {
 
     try {
       setIsApproving(true)
-      const linkTokenAddress = await loanManagerContract.linkToken()
+      const usdtTokenAddress = await loanManagerContract.linkToken()
       const signer = loanManagerContract.signer
-      const linkContract = new Contract(linkTokenAddress, LINK_TOKEN_ABI, signer)
+      const usdtTokenContract = new Contract(usdtTokenAddress, usdtTokenABI, signer)
 
-      const tx = await linkContract.approve(loanManagerContract.address, amount)
+      const tx = await usdtTokenContract.approve(loanManagerContract.address, amount)
       await tx.wait()
 
       toast.success("LINK token approval successful")

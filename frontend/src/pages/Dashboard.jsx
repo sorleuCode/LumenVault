@@ -132,7 +132,7 @@ const DashboardContent = () => {
                 <h3 className="text-lg font-semibold text-gray-100 mb-4">Withdraw Rewards</h3>
                 <div className="mb-4">
                   <p className="text-gray-400 text-sm mb-1">Contract Balance:</p>
-                  <p className="text-gray-100 text-xl font-bold">{Number(contractBalance).toFixed(3)} LINK</p>
+                  <p className="text-gray-100 text-xl font-bold">{Number(contractBalance).toFixed(3)} USDT</p>
                 </div>
               </div>
 
@@ -191,7 +191,7 @@ const DashboardContent = () => {
               <div>
                 <p className="text-gray-400 text-sm font-medium">Total Value Locked</p>
                 <p className="text-3xl font-bold text-gray-100 mt-2">
-                  {totalValue} LINK
+                  {totalValue} USDT
                 </p>
 
               </div>

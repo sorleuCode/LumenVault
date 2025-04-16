@@ -2,7 +2,6 @@ import { useCallback } from "react";
 import useContractInstance from "./useContractInstance";
 import { useAppKitAccount, useAppKitNetwork } from "@reown/appkit/react";
 import { toast } from "react-toastify";
-import { baseSepolia } from "@reown/appkit/networks";
 import { ErrorDecoder } from "ethers-decode-error";
 import { formatUnits } from "ethers";
 
@@ -18,20 +17,13 @@ const useGetLoanTotalRepayment = () => {
                 return;
             }
 
-            // if (!address) {
-            //     toast.error("Please connect your wallet");
-            //     return;
-            // }
 
             if (!contract) {
                 toast.error("Contract not found");
                 return;
             }
 
-            if (Number(chainId) !== Number(baseSepolia.id)) {
-                toast.error("You're not connected to baseSepolia");
-                return;
-            }
+          
 
             try {
 

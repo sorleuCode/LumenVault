@@ -2,10 +2,9 @@ import { useCallback, useState } from "react";
 import useContractInstance from "./useContractInstance";
 import { useAppKitAccount, useAppKitNetwork } from "@reown/appkit/react";
 import { toast } from "react-toastify";
-import { baseSepolia } from "@reown/appkit/networks";
 import { ErrorDecoder } from "ethers-decode-error";
 import { Contract } from "ethers";
-import linkTokenABI from "../ABI/linkToken.json"
+import usdtTokenABI from "../ABI/usdtToken.json"
 import useSignerOrProvider from "./useSignerOrProvider";
 
 
@@ -13,13 +12,13 @@ const useFundLoan = () => {
   const contract = useContractInstance(true);
   const { address } = useAppKitAccount();
   const { chainId } = useAppKitNetwork();
-  const linkTokenContractAddress = import.meta.env.VITE_LINK_TOKEN_CONTRACT_ADDRESS;
-  const lendLinkContractAddress = import.meta.env.VITE_LEND_LINK_CONTRACT_ADDRESS
+  const usdtTokenContractAddress = import.meta.env.VITE_USDT_TOKEN_CONTRACT_ADDRESS;
+  const lumenVaultContractAddress = import.meta.env.VITE_LUMEN_VAULT_CONTRACT_ADDRESS
 
 
   const { signer } = useSignerOrProvider();
 
-  const linkContract = new Contract(linkTokenContractAddress, linkTokenABI, signer);
+  const usdtContract = new Contract(usdtTokenContractAddress, usdtTokenABI, signer);
 
   return useCallback(
     async (loanId, loanAmount) => {
@@ -33,20 +32,16 @@ const useFundLoan = () => {
         return;
       }
 
-      if (!contract || !linkContract) {
+      if (!contract || !usdtContract) {
         toast.error("Contract not found");
         return;
       }
 
-      if (Number(chainId) !== Number(baseSepolia.id)) {
-        toast.error("You're not connected to baseSepolia");
-        return;
-      }
-
+    
       try {
 
-        const estimatedGas = await linkContract?.approve?.estimateGas(
-            lendLinkContractAddress,
+        const estimatedGas = await usdtContract?.approve?.estimateGas(
+          lumenVaultContractAddress,
           loanAmount
         );
 
@@ -55,7 +50,7 @@ const useFundLoan = () => {
           return;
         }
 
-        const tx = await linkContract.approve(lendLinkContractAddress, loanAmount, {
+        const tx = await usdtContract.approve(lumenVaultContractAddress, loanAmount, {
           gasLimit: (estimatedGas * BigInt(120)) / BigInt(100),
         });
 
@@ -96,7 +91,7 @@ const useFundLoan = () => {
         toast.error("Loan funding failed", decodedError);
       }
     },
-    [contract, address, chainId, linkContract]
+    [contract, address, chainId, usdtContract]
   );
 };
 

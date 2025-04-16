@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { formatEther, formatUnits } from 'ethers';
-import useContractInstance from './useContractInstance';
 import { useAppKitAccount } from '@reown/appkit/react';
 import { toast } from 'react-toastify';
 import { useLoanRequests } from '../context/LoanContext.jsx';
@@ -45,7 +44,7 @@ useEffect(() => {
         activeLoans.push({
           id: loan.loanId,
           amount: loan.amount,
-          collateral: 'ETH',
+          collateral: 'PTT',
           duration: loan.duration,
           interestRate: loan.maxInterestRate,
           dueDate: loan.dueDate,

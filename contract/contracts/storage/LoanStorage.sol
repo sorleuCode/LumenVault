@@ -48,20 +48,15 @@ contract LoanStorage {
         bool hasRepaid;
     }
 
-    // Main storage mappings
     mapping(uint256 => LoanCore) public loansCore;
     mapping(uint256 => LoanStatus) public loansStatus;
     mapping(uint256 => LoanInterest) public loansInterest;
-
-    // Changed from public to internal
-
     mapping(uint256 => mapping(address => uint256)) public loansCollateral;
     mapping(address => uint256[]) public borrowerLoans;
     mapping(address => uint256[]) public lenderLoans;
     mapping(uint256 => LoanRequest) public loanRequests;
     mapping(address => uint256) public lenderAvailableFunds;
-    mapping(address => CollateralRegistry.CollateralInfo)
-        public supportedCollaterals;
+    mapping(address => CollateralRegistry.CollateralInfo) public supportedCollaterals;
 
     uint256[] AllLoansID;
 }

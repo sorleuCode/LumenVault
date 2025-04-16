@@ -2,7 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useState } from "rea
 import useContractInstance from "../hooks/useContractInstance";
 import { formatUnits, formatEther, Contract } from "ethers";
 import { readOnlyProvider } from "../constants/readOnlyProvider";
-import lendLinkABI from "../ABI/lendLink.json";
+import lumenVault from "../ABI/lumenVault.json";
 
 const loanContext = createContext({
     loanRequests: []
@@ -24,7 +24,7 @@ export const LoanContextProvider = ({ children }) => {
             maxInterestRate: (Number(loan.maxInterestRate) / 100).toFixed(2),
             dueDate: dueDate,
             duration: durationInDays > 0 ? durationInDays : Math.floor(Number(loan.duration) / (60 * 60)),
-            collateralAmount: formatEther(loan.collateralAmount, 18, 3).toLocaleString(),
+            collateralAmount: formatUnits(loan.collateralAmount, 18, 3).toLocaleString(),
             isActive: Boolean(loan.isActive),
             hasRepaid: Boolean(loan.hasRepaid),
             collateralRatio: "120",
@@ -57,7 +57,7 @@ export const LoanContextProvider = ({ children }) => {
             maxInterestRate: (Number(maxInterestRate) / 100).toFixed(2),
             dueDate: new Date(Date.now() + Number(duration) * 1000).toLocaleString(),
             duration: Math.floor(Number(duration) / (60 * 60 * 24)) || Math.floor(Number(duration) / (60 * 60)),
-            collateralAmount: formatEther(collateral, 18, 3).toLocaleString(),
+            collateralAmount: formatUnits(collateral, 18, 3).toLocaleString(),
             isActive: false,
             hasRepaid: false,
             collateralRatio: "120",
@@ -89,8 +89,8 @@ export const LoanContextProvider = ({ children }) => {
     // Set up event listeners
     useEffect(() => {
         const contract = new Contract(
-            import.meta.env.VITE_LEND_LINK_CONTRACT_ADDRESS,
-            lendLinkABI,
+            import.meta.env.VITE_LUMEN_VAULT_CONTRACT_ADDRESS,
+            lumenVault,
             readOnlyProvider
         );
 

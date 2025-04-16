@@ -3,13 +3,18 @@
     "inputs": [
       {
         "internalType": "contract IERC20",
-        "name": "_linkToken",
+        "name": "_usdtToken",
         "type": "address"
       },
       {
-        "internalType": "contract AggregatorV3Interface",
-        "name": "_priceFeed",
+        "internalType": "contract IERC20",
+        "name": "_pttToken",
         "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_initialPttUsdtPrice",
+        "type": "uint256"
       }
     ],
     "stateMutability": "nonpayable",
@@ -291,6 +296,19 @@
     "anonymous": false,
     "inputs": [
       {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "newPrice",
+        "type": "uint256"
+      }
+    ],
+    "name": "PriceUpdated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
         "indexed": true,
         "internalType": "uint256",
         "name": "loanId",
@@ -463,7 +481,26 @@
   },
   {
     "inputs": [],
-    "name": "getETHPrice",
+    "name": "getPTTPrice",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "loanAmount",
+        "type": "uint256"
+      }
+    ],
+    "name": "getRequiredCollateralAmount",
     "outputs": [
       {
         "internalType": "uint256",
@@ -497,25 +534,6 @@
       {
         "internalType": "uint256",
         "name": "interestAmount",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "loanAmount",
-        "type": "uint256"
-      }
-    ],
-    "name": "getrequiredCollateralAmount",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
         "type": "uint256"
       }
     ],
@@ -560,19 +578,6 @@
         "internalType": "uint256",
         "name": "",
         "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "linkToken",
-    "outputs": [
-      {
-        "internalType": "contract IERC20",
-        "name": "",
-        "type": "address"
       }
     ],
     "stateMutability": "view",
@@ -864,12 +869,38 @@
   },
   {
     "inputs": [],
-    "name": "priceFeed",
+    "name": "priceDecimals",
     "outputs": [
       {
-        "internalType": "contract AggregatorV3Interface",
+        "internalType": "uint8",
+        "name": "",
+        "type": "uint8"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "pttToken",
+    "outputs": [
+      {
+        "internalType": "contract IERC20",
         "name": "",
         "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "pttUsdtPrice",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -908,7 +939,7 @@
     ],
     "name": "requestLoan",
     "outputs": [],
-    "stateMutability": "payable",
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -982,6 +1013,32 @@
     "name": "updateLiquidationThreshold",
     "outputs": [],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_newPrice",
+        "type": "uint256"
+      }
+    ],
+    "name": "updatePttUsdtPrice",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "usdtToken",
+    "outputs": [
+      {
+        "internalType": "contract IERC20",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   },
   {
