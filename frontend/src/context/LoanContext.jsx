@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import useContractInstance from "../hooks/useContractInstance";
-import { formatUnits, formatEther, Contract } from "ethers";
+import { formatUnits, formatEther, Contract, keccak256, toUtf8Bytes } from "ethers";
 import { readOnlyProvider } from "../constants/readOnlyProvider";
 import lumenVaultABI from "../ABI/lumenVault.json";
 
@@ -40,7 +40,7 @@ export const LoanContextProvider = ({ children }) => {
             const formattedLoanRequests = data.map(formatLoanRequest);
             setLoanRequests(formattedLoanRequests);
         } catch (error) {
-            console.log("Error fetching Loans", error);
+            console.error("Error fetching Loans:", error);
         }
     }, [readOnlyTodoContract]);
 
@@ -61,7 +61,7 @@ export const LoanContextProvider = ({ children }) => {
             isActive: false,
             hasRepaid: false,
             collateralRatio: "120",
-            dueDateTimestamp: Number(loan.dueDate) * 1000, // Add timestamp for comparison
+            dueDateTimestamp: Number(duration) * 1000,
             isDays: Number(duration) >= 86400 // 24 hours in seconds
         };
 
@@ -84,9 +84,7 @@ export const LoanContextProvider = ({ children }) => {
         ));
     }, []);
 
-
-
-    // Set up event listeners
+    // Poll for events
     useEffect(() => {
         const contract = new Contract(
             import.meta.env.VITE_LUMEN_VAULT_CONTRACT_ADDRESS,
@@ -94,15 +92,61 @@ export const LoanContextProvider = ({ children }) => {
             readOnlyProvider
         );
 
-        contract.on("LoanRequested", handleLoanRequested);
-        contract.on("LoanFunded", handleLoanFunded);
-        contract.on("LoanRepaid", handleLoanRepaid);
-
-        return () => {
-            contract.off("LoanRequested", handleLoanRequested);
-            contract.off("LoanFunded", handleLoanFunded);
-            contract.off("LoanRepaid", handleLoanRepaid);
+        // Define event topics (keccak256 hash of event signatures)
+        const eventTopics = {
+            LoanRequested: keccak256(toUtf8Bytes("LoanRequested(uint256,address,uint256,uint256,uint256,uint256)")),
+            LoanFunded: keccak256(toUtf8Bytes("LoanFunded(uint256)")),
+            LoanRepaid: keccak256(toUtf8Bytes("LoanRepaid(uint256)"))
         };
+
+        // Polling function
+        const pollEvents = async () => {
+            try {
+                // Fetch logs for each event
+                for (const [eventName, topic] of Object.entries(eventTopics)) {
+                    const filter = {
+                        address: import.meta.env.VITE_LUMEN_VAULT_CONTRACT_ADDRESS,
+                        topics: [topic],
+                        fromBlock: 'latest',
+                        toBlock: 'latest'
+                    };
+                    const logs = await readOnlyProvider.getLogs(filter);
+                    logs.forEach(log => {
+                        try {
+                            const parsedLog = contract.interface.parseLog(log);
+                            if (eventName === "LoanRequested") {
+                                handleLoanRequested(
+                                    parsedLog.args.loanId,
+                                    parsedLog.args.borrower,
+                                    parsedLog.args.amount,
+                                    parsedLog.args.collateral,
+                                    parsedLog.args.maxInterestRate,
+                                    parsedLog.args.duration
+                                );
+                            } else if (eventName === "LoanFunded") {
+                                handleLoanFunded(parsedLog.args.loanId);
+                            } else if (eventName === "LoanRepaid") {
+                                handleLoanRepaid(parsedLog.args.loanId);
+                            }
+                        } catch (parseError) {
+                            console.error(`Error parsing log for ${eventName}:`, parseError);
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error("Error polling events:", error);
+                if (error.code === -32601) {
+                    console.error("RPC method not supported:", error.message);
+                }
+            }
+        };
+
+        // Poll every 10 seconds
+        const intervalId = setInterval(pollEvents, 10000);
+        pollEvents(); // Initial call
+
+        // Cleanup
+        return () => clearInterval(intervalId);
     }, [handleLoanRequested, handleLoanFunded, handleLoanRepaid]);
 
     return (

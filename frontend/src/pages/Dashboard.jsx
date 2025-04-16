@@ -82,7 +82,7 @@ const DashboardContent = () => {
           ?.forEach((loan) => fetchCollateralDetails(loan.loanId, loan.amount));
       } catch (error) {
         console.error("Error fetching data:", error);
-      } finally {
+      } finally {w
         setIsLoading(false);
       }
     };
