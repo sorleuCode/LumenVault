@@ -6,8 +6,6 @@ import { defineChain } from "@reown/appkit/networks";
 const projectId = import.meta.env.VITE_APPKIT_PROJECT_ID;
 
 console.log({ projectId });
-
-// Updated RPC config to go through Vite proxy
 const pharosDevnet = defineChain({
   id: 50002,
   caipNetworkId: "eip155:50002",
@@ -15,12 +13,12 @@ const pharosDevnet = defineChain({
   name: "Pharos Devnet",
   nativeCurrency: {
     decimals: 18,
-    name: "MKT",
-    symbol: "MKT",
+    name: "PPT",
+    symbol: "PPT",
   },
   rpcUrls: {
     default: {
-      http: ["https://lumenvault.vercel.app/rpc"], // 👈 Proxy path to avoid CORS
+      http: ["https://devnet.dplabs-internal.com/"],
     },
   },
   blockExplorers: {
@@ -30,28 +28,27 @@ const pharosDevnet = defineChain({
     },
   },
   contracts: {
-    // Add the contracts here if needed
+    // Add the contracts here
   },
 });
-
-// List of supported networks
+// 2. Set the networks
 const networks = [pharosDevnet];
 
-// Optional metadata for wallet connection UI
+// 3. Create a metadata object - optional
 const metadata = {
   name: "My Website",
   description: "My Website description",
-  url: "https://mywebsite.com",
+  url: "https://mywebsite.com", // origin must match your domain & subdomain
   icons: ["https://avatars.mywebsite.com/"],
 };
 
-// Create AppKit instance with config
+// 4. Create a AppKit instance
 createAppKit({
   adapters: [new EthersAdapter()],
   networks,
   metadata,
   projectId,
   features: {
-    analytics: true, // Optional
+    analytics: true, 
   },
 });

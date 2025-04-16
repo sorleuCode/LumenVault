@@ -20,12 +20,6 @@ const useGetContractLinkBalance = () => {
   return useCallback(
     async () => {
       
-
-      // if (!address) {
-      //   toast.error("Please connect your wallet");
-      //   return;
-      // }
-
       if (!usdtTokenContract) {
         toast.error("Contract not found");
         return;
