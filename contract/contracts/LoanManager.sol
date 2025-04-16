@@ -14,10 +14,9 @@ contract LoanManager is ILoanManager, LoanStorage, ReentrancyGuard, Pausable {
     using CollateralUtils for uint256;
 
     IERC20 public usdtToken; // Mock USDT as the loan currency
-    IERC20 public pttToken;  // PTT as the collateral token (ERC-20 at 0xcB8a4dF93DEB878ae10044E37Ffc1ea7450630b8)
     address public owner;
 
-    uint256 public pttUsdtPrice; // Manual PTT/USDT price (used 1 PTT = 0.05 USDT)
+    uint256 public nativeUsdtPrice; // Manual Native Token/USDT price (e.g., 1 PHS = 0.05 USDT)
     uint8 public priceDecimals = 18; // Fixed decimals for manual price feed
 
     uint256 public collateralizationRatio = 120; // 120%
@@ -26,10 +25,9 @@ contract LoanManager is ILoanManager, LoanStorage, ReentrancyGuard, Pausable {
     uint256 public minLoanAmount = 10**18; // 1 USDT
     uint256 public maxLoanAmount = 100_000 * 10**18; // 100K USDT
 
-    constructor(IERC20 _usdtToken, IERC20 _pttToken, uint256 _initialPttUsdtPrice) {
+    constructor(IERC20 _usdtToken, uint256 _initialNativeUsdtPrice) {
         usdtToken = _usdtToken;
-        pttToken = _pttToken;
-        pttUsdtPrice = _initialPttUsdtPrice;
+        nativeUsdtPrice = _initialNativeUsdtPrice;
         owner = msg.sender;
     }
 
@@ -38,29 +36,28 @@ contract LoanManager is ILoanManager, LoanStorage, ReentrancyGuard, Pausable {
         _;
     }
 
-    function updatePttUsdtPrice(uint256 _newPrice) external onlyOwner {
-        pttUsdtPrice = _newPrice;
+    function updateNativeUsdtPrice(uint256 _newPrice) external onlyOwner {
+        nativeUsdtPrice = _newPrice;
         emit PriceUpdated(_newPrice);
     }
 
     event PriceUpdated(uint256 newPrice);
 
-    function getPTTPrice() public view returns (uint256) {
-        require(pttUsdtPrice > 0, "Price not set");
-        return pttUsdtPrice;
+    function getNativePrice() public view returns (uint256) {
+        require(nativeUsdtPrice > 0, "Price not set");
+        return nativeUsdtPrice;
     }
 
     function requestLoan(
         uint256 amount,
         uint256 maxInterestRate,
         uint256 duration
-    ) external override whenNotPaused nonReentrant {
+    ) external payable override whenNotPaused nonReentrant {
         require(amount >= minLoanAmount && amount <= maxLoanAmount, "Invalid loan amount");
 
-        uint256 pttPrice = getPTTPrice();
-        uint256 requiredCollateral = amount.calculateRequiredCollateral(pttPrice, collateralizationRatio, priceDecimals);
-
-        require(pttToken.transferFrom(msg.sender, address(this), requiredCollateral), "Collateral transfer failed");
+        uint256 nativePrice = getNativePrice();
+        uint256 requiredCollateral = amount.calculateRequiredCollateral(nativePrice, collateralizationRatio, priceDecimals);
+        require(msg.value >= requiredCollateral, "Insufficient native token collateral");
 
         loanCounter++;
 
@@ -75,7 +72,7 @@ contract LoanManager is ILoanManager, LoanStorage, ReentrancyGuard, Pausable {
             borrower: msg.sender,
             lender: address(0),
             amount: amount,
-            collateral: requiredCollateral,
+            collateral: msg.value,
             interestRate: maxInterestRate,
             rateType: InterestRateType.FIXED,
             duration: duration
@@ -84,7 +81,14 @@ contract LoanManager is ILoanManager, LoanStorage, ReentrancyGuard, Pausable {
         borrowerLoans[msg.sender].push(loanCounter);
         tryAutomaticMatch(loanCounter);
 
-        emit LoanRequested(loanCounter, msg.sender, amount, requiredCollateral, maxInterestRate, duration);
+        emit LoanRequested(loanCounter, msg.sender, amount, msg.value, maxInterestRate, duration);
+
+        // Refund excess native token
+        if (msg.value > requiredCollateral) {
+            uint256 refund = msg.value - requiredCollateral;
+            (bool success, ) = payable(msg.sender).call{value: refund}("");
+            require(success, "Refund failed");
+        }
     }
 
     function fundLoan(uint256 loanId) external whenNotPaused nonReentrant {
@@ -210,9 +214,7 @@ contract LoanManager is ILoanManager, LoanStorage, ReentrancyGuard, Pausable {
         emit RewardCollected(loanId, reward);
     }
 
-
-
-     function getTotalLoanPayment(uint256 loanId) public view returns (uint256 totalPayment, uint256 principal, uint256 interestAmount) {
+    function getTotalLoanPayment(uint256 loanId) public view returns (uint256 totalPayment, uint256 principal, uint256 interestAmount) {
         LoanCore storage loan = loansCore[loanId];
         LoanStatus storage status = loansStatus[loanId];
         LoanInterest storage interest = loansInterest[loanId];
@@ -250,36 +252,34 @@ contract LoanManager is ILoanManager, LoanStorage, ReentrancyGuard, Pausable {
     }
 
     function liquidateOverdueLoan(uint256 loanId) external whenNotPaused nonReentrant {
-    LoanCore storage loan = loansCore[loanId];
-    LoanStatus storage status = loansStatus[loanId];
-    LoanRequest storage request = loanRequests[loanId];
+        LoanCore storage loan = loansCore[loanId];
+        LoanStatus storage status = loansStatus[loanId];
+        LoanRequest storage request = loanRequests[loanId];
 
-    require(status.active, "Loan not active");
-    require(block.timestamp > request.dueDate, "Loan not overdue");
-    require(!status.repaid, "Loan already repaid");
+        require(status.active, "Loan not active");
+        require(block.timestamp > request.dueDate, "Loan not overdue");
+        require(!status.repaid, "Loan already repaid");
 
-    (uint256 debt, , ) = getTotalLoanPayment(loanId); // USDT owed
-    uint256 collateralValue = (loan.collateral * pttUsdtPrice) / (10 ** priceDecimals); // USDT value of PTT
-    require(debt > (collateralValue * liquidationThreshold) / 100, "Collateral still sufficient");
+        (uint256 debt,,) = getTotalLoanPayment(loanId); // USDT owed
+        uint256 collateralValue = (loan.collateral * nativeUsdtPrice) / (10 ** priceDecimals); // USDT value of native token
+        require(debt > (collateralValue * liquidationThreshold) / 100, "Collateral still sufficient");
 
-    transferCollateralToLender(loanId);
+        transferCollateralToLender(loanId);
 
-    status.active = false;
-    status.defaulted = true;
+        status.active = false;
+        status.defaulted = true;
 
-    emit LoanLiquidated(loanId, loan.lender, loan.collateral); // Emit collateral amount
-}
+        emit LoanLiquidated(loanId, loan.lender, loan.collateral);
+    }
 
+    function transferCollateralToLender(uint256 loanId) internal {
+        LoanCore storage loan = loansCore[loanId];
+        uint256 amount = loan.collateral;
 
-function transferCollateralToLender(uint256 loanId) internal {
-    LoanCore storage loan = loansCore[loanId];
-    uint256 amount = loan.collateral;
-
-    loan.collateral = 0; // Reset collateral
-    require(pttToken.transfer(loan.lender, amount), "Collateral transfer failed");
-}
-
-   
+        loan.collateral = 0;
+        (bool success, ) = payable(loan.lender).call{value: amount}("");
+        require(success, "Collateral transfer failed");
+    }
 
     function returnCollateral(uint256 loanId) internal {
         LoanCore storage loan = loansCore[loanId];
@@ -287,7 +287,8 @@ function transferCollateralToLender(uint256 loanId) internal {
 
         if (amount > 0) {
             loan.collateral = 0;
-            require(pttToken.transfer(loan.borrower, amount), "Collateral transfer failed");
+            (bool success, ) = payable(loan.borrower).call{value: amount}("");
+            require(success, "Collateral return failed");
         }
     }
 
@@ -322,8 +323,8 @@ function transferCollateralToLender(uint256 loanId) internal {
     }
 
     function getRequiredCollateralAmount(uint256 loanAmount) external view returns (uint256) {
-        uint256 pttPrice = getPTTPrice();
-        return loanAmount.calculateRequiredCollateral(pttPrice, collateralizationRatio, priceDecimals);
+        uint256 nativePrice = getNativePrice();
+        return loanAmount.calculateRequiredCollateral(nativePrice, collateralizationRatio, priceDecimals);
     }
 
     function getLenderOfferedRate(address lender, uint256 amount) internal view returns (uint256) {
@@ -366,8 +367,6 @@ function transferCollateralToLender(uint256 loanId) internal {
         minLoanAmount = _minLoanAmount;
         maxLoanAmount = _maxLoanAmount;
     }
-
-   
 
     function getAllLoanRequests() external view returns (LoanRequestDetail[] memory) {
         uint256 validCount = 0;

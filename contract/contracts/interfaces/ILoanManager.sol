@@ -16,6 +16,6 @@ interface ILoanManager {
     event RewardsWithdrawn(address owner, uint256 contractBalance);
     event LoanLiquidated(uint256 indexed loanId, address indexed lender, uint256 loanAmount);
 
-    function requestLoan(uint256 amount, uint256 maxInterestRate, uint256 duration) external;
+    function requestLoan(uint256 amount, uint256 maxInterestRate, uint256 duration) external payable;
     function makePartialRepayment(uint256 loanId, uint256 amount) external;
 }
