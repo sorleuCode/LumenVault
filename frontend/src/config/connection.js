@@ -20,7 +20,7 @@ const pharosDevnet = defineChain({
   },
   rpcUrls: {
     default: {
-      http: ["http://localhost:5173/rpc"], // 👈 Proxy path to avoid CORS
+      http: ["https://lumenvault.vercel.app/rpc"], // 👈 Proxy path to avoid CORS
     },
   },
   blockExplorers: {
