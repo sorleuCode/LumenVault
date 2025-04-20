@@ -52,7 +52,7 @@ contract LoanManager is ILoanManager, LoanStorage, ReentrancyGuard, Pausable {
         uint256 amount,
         uint256 maxInterestRate,
         uint256 duration
-    ) external payable override whenNotPaused nonReentrant {
+    ) external payable override  nonReentrant {
         require(amount >= minLoanAmount && amount <= maxLoanAmount, "Invalid loan amount");
 
         uint256 nativePrice = getNativePrice();
@@ -91,29 +91,31 @@ contract LoanManager is ILoanManager, LoanStorage, ReentrancyGuard, Pausable {
         }
     }
 
-    function fundLoan(uint256 loanId) external whenNotPaused nonReentrant {
-        LoanCore storage loan = loansCore[loanId];
-        LoanStatus storage status = loansStatus[loanId];
+   function fundLoan(uint256 loanId) external  nonReentrant {
+    LoanCore storage loan = loansCore[loanId];
+    LoanStatus storage status = loansStatus[loanId];
 
-        require(!status.active, "Loan already active");
-        require(loan.lender == address(0), "Loan already funded");
-        require(usdtToken.allowance(msg.sender, address(this)) >= loan.amount, "Insufficient allowance");
+    require(loan.borrower != address(0), "Loan does not exist");
+    require(!status.active, "Loan already active");
+    require(loan.lender == address(0), "Loan already funded");
+    require(loan.amount > 0, "Invalid loan amount");
+    require(usdtToken.allowance(msg.sender, address(this)) >= loan.amount, "Insufficient allowance");
 
-        require(usdtToken.transferFrom(msg.sender, address(this), loan.amount), "Transfer failed");
+    require(usdtToken.transferFrom(msg.sender, address(this), loan.amount), "Transfer failed");
 
-        loan.lender = msg.sender;
-        status.startTime = block.timestamp;
-        status.active = true;
+    loan.lender = msg.sender;
+    status.startTime = block.timestamp;
+    status.active = true;
 
-        require(usdtToken.transfer(loan.borrower, loan.amount), "Loan disbursement failed");
+    require(usdtToken.transfer(loan.borrower, loan.amount), "Loan disbursement failed");
 
-        lenderLoans[msg.sender].push(loanId);
-        borrowerLoans[loan.borrower].push(loanId);
-        AllLoansID.push(loanId);
+    lenderLoans[msg.sender].push(loanId);
+    borrowerLoans[loan.borrower].push(loanId);
+    AllLoansID.push(loanId);
 
-        emit LoanFunded(loanId, msg.sender);
-        emit LoanDisbursed(loanId, loan.borrower, loan.amount);
-    }
+    emit LoanFunded(loanId, msg.sender);
+    emit LoanDisbursed(loanId, loan.borrower, loan.amount);
+}
 
     function makePartialRepayment(uint256 loanId, uint256 amount) external override whenNotPaused nonReentrant {
         LoanCore storage loan = loansCore[loanId];
@@ -175,7 +177,7 @@ contract LoanManager is ILoanManager, LoanStorage, ReentrancyGuard, Pausable {
         emit InterestAccrued(loanId, accrued);
     }
 
-    function repayLoanWithReward(uint256 loanId) external whenNotPaused nonReentrant {
+    function repayLoanWithReward(uint256 loanId) external  nonReentrant {
         LoanCore storage loan = loansCore[loanId];
         LoanStatus storage status = loansStatus[loanId];
         LoanInterest storage interest = loansInterest[loanId];
@@ -251,7 +253,7 @@ contract LoanManager is ILoanManager, LoanStorage, ReentrancyGuard, Pausable {
         return (totalPayment, principal, interestAmount);
     }
 
-    function liquidateOverdueLoan(uint256 loanId) external whenNotPaused nonReentrant {
+    function liquidateOverdueLoan(uint256 loanId) external  nonReentrant {
         LoanCore storage loan = loansCore[loanId];
         LoanStatus storage status = loansStatus[loanId];
         LoanRequest storage request = loanRequests[loanId];

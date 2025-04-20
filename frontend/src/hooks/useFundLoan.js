@@ -1,29 +1,27 @@
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import useContractInstance from "./useContractInstance";
 import { useAppKitAccount, useAppKitNetwork } from "@reown/appkit/react";
 import { toast } from "react-toastify";
 import { ErrorDecoder } from "ethers-decode-error";
-import { Contract } from "ethers";
-import usdtTokenABI from "../ABI/usdtToken.json"
+import { Contract, ethers } from "ethers"; // Remove BigNumber import
+import usdtTokenABI from "../ABI/usdtToken.json";
 import useSignerOrProvider from "./useSignerOrProvider";
-
 
 const useFundLoan = () => {
   const contract = useContractInstance(true);
   const { address } = useAppKitAccount();
   const { chainId } = useAppKitNetwork();
-  const usdtTokenContractAddress = import.meta.env.VITE_USDT_TOKEN_CONTRACT_ADDRESS;
-  const lumenVaultContractAddress = import.meta.env.VITE_LUMEN_VAULT_CONTRACT_ADDRESS
-
-
   const { signer } = useSignerOrProvider();
+
+  const usdtTokenContractAddress = import.meta.env.VITE_USDT_TOKEN_CONTRACT_ADDRESS;
+  const lumenVaultContractAddress = import.meta.env.VITE_LUMEN_VAULT_CONTRACT_ADDRESS;
 
   const usdtContract = new Contract(usdtTokenContractAddress, usdtTokenABI, signer);
 
   return useCallback(
     async (loanId, loanAmount) => {
-      if (!loanId) {
-        toast.error("Invalid loan");
+      if (!loanId || isNaN(loanId)) {
+        toast.error("Invalid loan ID");
         return;
       }
 
@@ -37,58 +35,86 @@ const useFundLoan = () => {
         return;
       }
 
-    
       try {
+        
 
-        const estimatedGas = await usdtContract?.approve?.estimateGas(
+        const status = await contract.loansStatus(loanId);
+
+        if (status.active) {
+          toast.error("Loan is already active");
+          return;
+        }
+
+        const balance = await usdtContract.balanceOf(address);
+
+        console.log({loanAmount})
+        console.log({balance})
+
+       
+
+        if (balance < loanAmount) {
+          toast.error("Insufficient token balance");
+          return;
+        }
+
+        const approveGas = await usdtContract.approve.estimateGas(
           lumenVaultContractAddress,
           loanAmount
         );
 
-        if (!estimatedGas) {
-          toast.error("Gas estimation failed");
-          return;
-        }
-
-        const tx = await usdtContract.approve(lumenVaultContractAddress, loanAmount, {
-          gasLimit: (estimatedGas * BigInt(120)) / BigInt(100),
+        const approveTx = await usdtContract.approve(lumenVaultContractAddress, loanAmount, {
+          gasLimit: approveGas * 120n / 100n,
         });
 
         
-        const trxReceipt = await tx.wait()
 
-        if (trxReceipt.status === 1) {
-          const estimatedGasLoan = await contract.fundLoan.estimateGas(loanId);
+        const approveReceipt = await approveTx.wait();
+ 
 
-          if (!estimatedGasLoan) {
-            toast.error("Gas estimation for loan failed");
-            return;
-          }
+        if (approveReceipt.status !== 1) {
+          toast.error("Token approval failed");
+          return;
+        }
 
-          const txLoan = await contract.fundLoan(loanId, {
-            gasLimit: (estimatedGasLoan * BigInt(120)) / BigInt(100),
-          });
 
-          const txReceipt = await txLoan.wait();
+        const allowance = await usdtContract.allowance(address, lumenVaultContractAddress);
 
-          if (txReceipt.status === 1){
-            toast.success("Loan funded successfully")
 
-            return true;
-            } 
+        if (allowance < loanAmount) {
+          toast.error("Insufficient token allowance");
+          return;
+        }
 
-          toast.error("Failed to fund loan");
+        // Fund the loan
+        let estimatedGasLoan;
+        try {
+          estimatedGasLoan = await contract.fundLoan.estimateGas(loanId);
+        } catch (gasEstimationError) {
+          const decoder = ErrorDecoder.create();
+          const decoded = await decoder.decode(gasEstimationError);
+          console.error("Gas estimation error:", decoded);
+          toast.error(decoded?.message || "Gas estimation failed for loan funding");
+          return;
+        }
+
+        const txLoan = await contract.fundLoan(loanId, {
+          gasLimit: estimatedGasLoan * 120n / 100n,
+        });
+
+        const txReceipt = await txLoan.wait();
+
+        if (txReceipt.status === 1) {
+          toast.success("Loan funded successfully");
+          return true;
         } else {
-          toast.error("Approval failed");
+          toast.error("Loan funding failed");
         }
       } catch (error) {
-        console.error("Error funding loan", error);
-
-        const errorDecoder = ErrorDecoder.create();
-        const decodedError = await errorDecoder.decode(error);
-
-        console.error("Decoded Error:", decodedError);
-        toast.error("Loan funding failed", decodedError);
+        console.error("Error funding loan:", error);
+        const decoder = ErrorDecoder.create();
+        const decoded = await decoder.decode(error);
+        console.error("Decoded error:", decoded);
+        toast.error(decoded?.message || "Loan funding failed");
       }
     },
     [contract, address, chainId, usdtContract]
@@ -96,4 +122,3 @@ const useFundLoan = () => {
 };
 
 export default useFundLoan;
-
