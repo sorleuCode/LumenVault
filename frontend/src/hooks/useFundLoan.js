@@ -25,6 +25,7 @@ const useFundLoan = () => {
         return;
       }
 
+
       if (!address) {
         toast.error("Please connect your wallet");
         return;
@@ -63,7 +64,7 @@ const useFundLoan = () => {
         );
 
         const approveTx = await usdtContract.approve(lumenVaultContractAddress, loanAmount, {
-          gasLimit: approveGas * 120n / 100n,
+          gasLimit: (approveGas * BigInt(120)) / BigInt(100),
         });
 
         
@@ -98,7 +99,7 @@ const useFundLoan = () => {
         }
 
         const txLoan = await contract.fundLoan(loanId, {
-          gasLimit: estimatedGasLoan * 120n / 100n,
+          gasLimit: (estimatedGasLoan * BigInt(120)) / BigInt(100),
         });
 
         const txReceipt = await txLoan.wait();
