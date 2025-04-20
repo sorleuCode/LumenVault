@@ -74,7 +74,7 @@ const BorrowPage = () => {
     };
 
     fetchRepayments();
-}, []);
+}, [loanRepayments]);
   
   // Replace the existing collateral calculation
   useEffect(() => {
@@ -195,6 +195,8 @@ const BorrowPage = () => {
     setIsLoading(true)
 
     try {
+
+      console.log({repayment2: repayment})
       const result = await repayLoan(loanId, repayment)
       if(result) {
         setIsLoading(false);

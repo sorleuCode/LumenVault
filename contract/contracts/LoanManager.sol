@@ -13,11 +13,11 @@ import "./storage/LoanStorage.sol";
 contract LoanManager is ILoanManager, LoanStorage, ReentrancyGuard, Pausable {
     using CollateralUtils for uint256;
 
-    IERC20 public usdtToken; // Mock USDT as the loan currency
+    IERC20 public usdtToken; 
     address public owner;
 
-    uint256 public nativeUsdtPrice; // Manual Native Token/USDT price (e.g., 1 PHS = 0.05 USDT)
-    uint8 public priceDecimals = 18; // Fixed decimals for manual price feed
+    uint256 public nativeUsdtPrice; 
+    uint8 public priceDecimals = 18; 
 
     uint256 public collateralizationRatio = 120; // 120%
     uint256 public liquidationThreshold = 110; // 110%
