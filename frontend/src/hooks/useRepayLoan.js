@@ -3,7 +3,7 @@ import useContractInstance from "./useContractInstance";
 import { useAppKitAccount, useAppKitNetwork } from "@reown/appkit/react";
 import { toast } from "react-toastify";
 import { ErrorDecoder } from "ethers-decode-error";
-import { Contract, ethers } from "ethers";
+import { Contract, ethers, parseUnits } from "ethers";
 import usdtTokenABI from "../ABI/usdtToken.json";
 import useSignerOrProvider from "./useSignerOrProvider";
 
@@ -19,6 +19,7 @@ const useRepayLoan = () => {
 
   return useCallback(
     async (loanId, repayment) => {
+
       if (!loanId) {
         toast.error("Invalid loan ID");
         return;
@@ -39,16 +40,31 @@ const useRepayLoan = () => {
         return;
       }
 
+
+      
+      console.log("Repaying loan with params:", {
+        loanId: loanId.toString(),
+        repayment: repayment,
+        contract: contract.target,
+        usdtContract: usdtContract.target,
+        chainId,
+        user: address,
+      });
+
+
+
       try {
-        const repaymentWei = BigInt(repayment);
-        if (repaymentWei <= 0n) {
+        const repaymenInNum = Number(repayment);
+
+        const bigIntRepayment = parseUnits((repaymenInNum * 2).toString(), 18)
+        if (repaymenInNum <= 0) {
           toast.error("Repayment amount must be greater than 0");
           return;
         }
 
         console.log("Repaying loan with params:", {
           loanId: loanId.toString(),
-          repayment: repaymentWei.toString(),
+          repayment: repaymenInNum.toString(),
           contract: contract.target,
           usdtContract: usdtContract.target,
           chainId,
@@ -58,9 +74,9 @@ const useRepayLoan = () => {
         // Approve USDT transfer
         let estimatedGas;
         try {
-          estimatedGas = await usdtContract.estimateGas.approve(
+          estimatedGas = await usdtContract.approve.estimateGas(
             lumenVaultContractAddress,
-            repaymentWei
+            bigIntRepayment
           );
         } catch (estimateErr) {
           console.warn("Gas estimation for approve failed:", estimateErr);
@@ -68,7 +84,7 @@ const useRepayLoan = () => {
           return;
         }
 
-        const approveTx = await usdtContract.approve(lumenVaultContractAddress, repaymentWei, {
+        const approveTx = await usdtContract.approve(lumenVaultContractAddress, bigIntRepayment, {
           gasLimit: (estimatedGas * BigInt(120)) / BigInt(100),
           gasPrice: ethers.parseUnits("1", "gwei"), // Fallback for non-EIP-1559
         });
@@ -90,7 +106,7 @@ const useRepayLoan = () => {
         // Repay loan
         let estimatedGasLoan;
         try {
-          estimatedGasLoan = await contract.estimateGas.repayLoanWithReward(loanId);
+          estimatedGasLoan = await contract.repayLoanWithReward.estimateGas(loanId);
         } catch (estimateErr) {
           console.warn("Gas estimation for repayLoanWithReward failed:", estimateErr);
           toast.error("Failed to estimate gas for loan repayment");
@@ -119,7 +135,9 @@ const useRepayLoan = () => {
           return;
         }
       } catch (error) {
+
         console.error("Error repaying loan:", error);
+
         try {
           const errorDecoder = ErrorDecoder.create();
           const decodedError = await errorDecoder.decode(error);

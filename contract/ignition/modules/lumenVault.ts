@@ -4,7 +4,7 @@ import { ethers } from "hardhat";
 
 const lumenVaultModule = buildModule("lumenVaultModule", (m) => {
 
-  const mockUSDT = m.contract("MockUsdt", ["Mock Usdt", "MUSDT"]);
+  const mockUSDT = m.contract("MockUsdt");
 
   const _initialPttUsdtPrice = ethers.parseUnits("0.5", 18)
 

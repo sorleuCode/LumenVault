@@ -3,7 +3,7 @@ import useContractInstance from "./useContractInstance";
 import { useAppKitAccount, useAppKitNetwork } from "@reown/appkit/react";
 import { toast } from "react-toastify";
 import { ErrorDecoder } from "ethers-decode-error";
-import { Contract, ethers } from "ethers"; // Remove BigNumber import
+import { Contract } from "ethers"; // Remove BigNumber import
 import usdtTokenABI from "../ABI/usdtToken.json";
 import useSignerOrProvider from "./useSignerOrProvider";
 
@@ -58,12 +58,13 @@ const useFundLoan = () => {
           return;
         }
 
+      
         const approveGas = await usdtContract.approve.estimateGas(
           lumenVaultContractAddress,
-          loanAmount
+          loanAmount 
         );
 
-        const approveTx = await usdtContract.approve(lumenVaultContractAddress, loanAmount, {
+        const approveTx = await usdtContract.approve(lumenVaultContractAddress, loanAmount , {
           gasLimit: (approveGas * BigInt(120)) / BigInt(100),
         });
 
