@@ -69,7 +69,7 @@ const DashboardContent = () => {
     };
 
     fetchOwnerAddress();
-  }, []);
+  }, [, contractBalance, ownerAddress]);
 
   useEffect(() => {
     const fetchData = async () => {

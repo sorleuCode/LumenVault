@@ -21,7 +21,7 @@ const useGetContractLinkBalance = () => {
 
   return useCallback(
     async () => {
-      
+
       if (!usdtTokenContract) {
         toast.error("Contract not found");
         return;
@@ -34,11 +34,11 @@ const useGetContractLinkBalance = () => {
 
         const contractLinkBalance = await usdtTokenContract.balanceOf(String(lumenVaultContractAddress).toString());
 
-            console.log({contractLinkBalance})
-            return formatUnits(String(contractLinkBalance), 18)
+        console.log({ contractLinkBalance })
+        return formatUnits(String(contractLinkBalance), 18)
 
 
-        
+
       } catch (error) {
         console.error("error fetching balance", error);
 
@@ -46,10 +46,9 @@ const useGetContractLinkBalance = () => {
         const decodedError = await errorDecoder.decode(error);
 
         console.error("Decoded Error:", decodedError);
-        toast.error("error fetching balance", decodedError);
       }
     },
-    [ address, chainId, usdtTokenContract]
+    [address, chainId, usdtTokenContract]
   );
 };
 
