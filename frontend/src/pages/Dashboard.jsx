@@ -10,7 +10,7 @@ import { toast } from "react-toastify";
 import useGetContractLinkBalance from "../hooks/useGetContractLinkBalance";
 
 const Card = ({ children, className }) => (
-  <div className={`rounded-xl ${className}`}>{children}</div>
+  <div className={`rounded-xl  ${className}`}>{children}</div>
 );
 
 const DashboardContent = () => {
@@ -69,7 +69,7 @@ const DashboardContent = () => {
     };
 
     fetchOwnerAddress();
-  }, [, contractBalance, ownerAddress]);
+  }, [contractBalance, ownerAddress]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -120,7 +120,7 @@ const DashboardContent = () => {
   }, [withdrawAddress, withdrawalHandler]);
 
   return (
-    <div className="p-6 space-y-8 bg-black min-h-screen">
+    <div className="p-6 space-y-8 bg-black min-h-screen flex flex-col items-center justify-center md:block ">
       {/* Welcome Message */}
       <div className="text-gray-100 text-2xl font-semibold">
         Welcome, {address ? `${address.slice(0, 6)}...${address.slice(-4)}` : "user"}
@@ -129,13 +129,12 @@ const DashboardContent = () => {
       {/* Withdraw Section (Only for Owner) */}
       {isOwner && (
         <div className="w-full max-w-[40%]">
-          <Card className="bg-gradient-to-br from-red-950 to-gray-900">
+          <Card className="bg-gradient-to-br from-red-950 to-gray-900 w-56 md:w-80">
             <div className="p-4">
               <div className="flex justify-between items-end">
-                <h3 className="text-lg font-semibold text-gray-100 mb-4">Withdraw Rewards</h3>
+                <h3 className=" text-[14px] md:text-lg font-semibold sm:text-base text-gray-100 mb-4">Contract Balance:</h3>
                 <div className="mb-4">
-                  <p className="text-gray-400 text-sm mb-1">Contract Balance:</p>
-                  <p className="text-gray-100 text-xl font-bold">{Number(contractBalance).toFixed(3)} MUSDT</p>
+                  <p className="text-gray-100 text-[14px] md:text-lg sm:text-base font-light">{Number(contractBalance).toFixed(2)} MUSDT</p>
                 </div>
               </div>
 
@@ -143,25 +142,24 @@ const DashboardContent = () => {
               <div className="flex gap-2 space-x-2 justify-center items-center">
                 <input
                   type="text"
-                  placeholder="Enter address to withdraw to"
+                  placeholder="Enter address"
                   required
                   value={withdrawAddress}
                   onChange={(e) => setWithdrawAddress(e.target.value)}
-                  className="p-2 w-[80%] bg-gray-800 text-gray-100 rounded-lg focus:outline-none"
+                  className="p-1 w-[80%] bg-gray-800 text-gray-100 rounded-lg focus:outline-none"
                   disabled={isWithdrawing} // Disable input during withdrawal
                 />
                 <button
                   onClick={handleWithdrawal}
                   disabled={isWithdrawing} // Disable button during withdrawal
-                  className="px-2 py-2 bg-red-600 w-[35%] text-white rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center"
+                  className="px-1 py-1 bg-red-600 sm:w-[35%] text-white rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center"
                 >
                   {isWithdrawing ? (
-                    <div className="flex items-center">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      Withdrawing...
+                    <div className="flex text-[14px] md:text-lg sm:text-base items-center justify-center">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
                     </div>
                   ) : (
-                    "Withdraw"
+                    "withdraw"
                   )}
                 </button>
               </div>
