@@ -7,7 +7,7 @@ import { useCollateralCalculator } from "../hooks/useCollateralCalculator";
 import useWithdrawRewards from "../hooks/useWithdrawRewards";
 import useGetOwnerAddress from "../hooks/useGetOwnerAddress";
 import { toast } from "react-toastify";
-import useGetContractLinkBalance from "../hooks/useGetContractLinkBalance";
+import useGetContractLinkTBalance from "../hooks/useGetContractLinkTBalance";
 
 const Card = ({ children, className }) => (
   <div className={`rounded-xl  ${className}`}>{children}</div>
@@ -30,7 +30,7 @@ const DashboardContent = () => {
   const { loanRequests } = useLoanRequests();
   const withdrawalHandler = useWithdrawRewards();
   const getOnwerAddress = useGetOwnerAddress();
-  const getContractBalance = useGetContractLinkBalance();
+  const getContractBalance = useGetContractLinkTBalance();
 
   const fetchLoanPaymentDetails = useCallback(async (loanId) => {
     try {
@@ -234,19 +234,19 @@ const DashboardContent = () => {
                     <div className="flex justify-between items-start mb-2">
                       <div>
                         <span className="text-gray-100 font-medium">Loan #{loan.loanId}</span>
-                        <p className="text-sm text-gray-400">Amount: {Number(loan.amount).toFixed(2)} LINK</p>
+                        <p className="text-sm text-gray-400">Amount: {Number(loan.amount).toFixed(2)} mUSDT</p>
                       </div>
                       <span className="px-2 py-1 bg-emerald-900/20 text-emerald-400 text-xs rounded-full">Active</span>
                     </div>
                     <div className="flex justify-between text-sm mt-2">
-                      <span className="text-gray-400">Collateral: {Number(loan.collateralAmount).toFixed(3)} ETH</span>
+                      <span className="text-gray-400">Collateral: {Number(loan.collateralAmount).toFixed(3)} PTT</span>
                     </div>
                     <span className="text-gray-400">Interest: {loan.maxInterestRate}%</span>
 
                     {loanPayments[loan.loanId] && (
                       <div className="mt-2 text-sm text-gray-400">
-                        <p>Total Payment: {Number((loanPayments[loan.loanId].totalPayment)).toFixed(5)} LINK</p>
-                        <p>Principal: {Number((loanPayments[loan.loanId].principal)).toFixed(1)} LINK</p>
+                        <p>Total Payment: {Number((loanPayments[loan.loanId].totalPayment)).toFixed(5)} mUSDT</p>
+                        <p>Principal: {Number((loanPayments[loan.loanId].principal)).toFixed(1)} mUSDT</p>
                       </div>
                     )}
                   </div>
@@ -266,11 +266,11 @@ const DashboardContent = () => {
                   <div key={loan.loanId} className="p-4 bg-gray-900/50 rounded-xl hover:bg-gray-900/70 transition-colors cursor-pointer group">
                     <div className="flex justify-between items-center">
                       <div>
-                        <p className="text-gray-100 font-medium">{Number(loan.amount)} LINK Requested</p>
+                        <p className="text-gray-100 font-medium">{Number(loan.amount)} mUSDT Requested</p>
                         <p className="font-medium"><span className="text-gray-400">Interest: {loan.maxInterestRate}%</span></p>
                         {requiredCollateral[loan.loanId] && (
                           <p className="text-sm text-gray-400">
-                            Required Collateral: {(Number(requiredCollateral[loan.loanId])).toFixed(3)} ETH
+                            Required Collateral: {(Number(requiredCollateral[loan.loanId])).toFixed(3)} PTT
                           </p>
                         )}
                       </div>

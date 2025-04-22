@@ -57,7 +57,7 @@ const LendingPage = () => {
         {/* Header Section */}
         <div className="mb-12">
           <div className="flex justify-between items-center mb-8">
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+            <h1 className=" text-base md:text-lg xl:text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
               Lending Dashboard
             </h1>
           </div>
@@ -102,10 +102,10 @@ const LendingPage = () => {
                   <div className="flex justify-between items-start mb-4">
                     <div>
                       <h3 className="text-xl font-bold mb-1">
-                        {loan.amount} LINK
+                        {loan.amount} mUSDT
                       </h3>
                       <p className="text-gray-400">
-                        Collateral: {Number(loan.collateralAmount).toFixed(3)} ETH
+                        Collateral: {Number(loan.collateralAmount).toFixed(3)} PTT
                       </p>
                     </div>
                     <Shield className="h-5 w-5 text-blue-400" />
@@ -132,7 +132,7 @@ const LendingPage = () => {
                     <div className="pt-1 flex items-center justify-between">
                       <div className="text-sm text-gray-400">Amount:</div>
                       <div className="text-sm text-gray-400">
-                        {loan.amount} LINK
+                        {loan.amount} mUSDT
                       </div>
                     </div>
 
@@ -183,11 +183,11 @@ const LendingPage = () => {
             <div className="space-y-4">
               <div className="flex justify-between items-center">
                 <span className="text-gray-400">Amount to Fund</span>
-                <span className="font-medium">{selectedLoan.amount} LINK</span>
+                <span className="font-medium">{selectedLoan.amount} mUSDT</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-gray-400">Collateral</span>
-                <span className="font-medium">{Number(selectedLoan.collateralAmount).toFixed(3)} ETH</span>
+                <span className="font-medium">{Number(selectedLoan.collateralAmount).toFixed(3)} PTT</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-gray-400">Interest Rate</span>
@@ -198,7 +198,7 @@ const LendingPage = () => {
                 <AlertCircle className="h-5 w-5 mr-3 mt-0.5 text-blue-400" />
                 <div>
                   <h4 className="font-medium mb-1">Information</h4>
-                  <p className="text-sm text-gray-300">Make sure you have enough LINK tokens in your wallet before funding.</p>
+                  <p className="text-sm text-gray-300">Make sure you have enough mUSDT tokens in your wallet before funding.</p>
                 </div>
               </div>
 
