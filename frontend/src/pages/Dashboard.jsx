@@ -120,7 +120,7 @@ const DashboardContent = () => {
   }, [withdrawAddress, withdrawalHandler]);
 
   return (
-    <div className="p-6 space-y-8 bg-black min-h-screen flex flex-col items-center justify-center md:block ">
+    <div className="p-6 space-y-8 bg-black min-h-screen flex flex-col  justify-center md:block ">
       {/* Welcome Message */}
       <div className="text-gray-100 text-2xl font-semibold">
         Welcome, {address ? `${address.slice(0, 6)}...${address.slice(-4)}` : "user"}
@@ -134,7 +134,7 @@ const DashboardContent = () => {
               <div className="flex justify-between items-end">
                 <h3 className=" text-[14px] md:text-lg font-semibold sm:text-base text-gray-100 mb-4">Contract Balance:</h3>
                 <div className="mb-4">
-                  <p className="text-gray-100 text-[14px] md:text-lg sm:text-base font-light">{Number(contractBalance).toFixed(2)} MUSDT</p>
+                  <p className="text-gray-100 text-[14px] md:text-lg sm:text-base font-light">{Number(contractBalance).toFixed(2)} mUSDT</p>
                 </div>
               </div>
 
