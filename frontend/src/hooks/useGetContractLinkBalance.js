@@ -12,6 +12,8 @@ const useGetContractLinkBalance = () => {
   const { chainId } = useAppKitNetwork();
   const { readOnlyProvider } = useSignerOrProvider()
   const usdtTokenContractAddress = import.meta.env.VITE_USDT_TOKEN_CONTRACT_ADDRESS;
+  const lumenVaultContractAddress = import.meta.env.VITE_LUMEN_VAULT_CONTRACT_ADDRESS;
+
 
 
 
@@ -30,7 +32,7 @@ const useGetContractLinkBalance = () => {
 
 
 
-        const contractLinkBalance = await usdtTokenContract.balanceOf(String(usdtTokenContractAddress).toString());
+        const contractLinkBalance = await usdtTokenContract.balanceOf(String(lumenVaultContractAddress).toString());
 
             console.log({contractLinkBalance})
             return formatUnits(String(contractLinkBalance), 18)
