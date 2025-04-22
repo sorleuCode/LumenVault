@@ -36,10 +36,18 @@ const BorrowPage = () => {
     amount: "",
     duration: 0,
     maxInterestRate: 0,
-    selectedCollateral: "ETH",
-    selectedBorrowToken: "LINK",
-    date: futureDate.toISOString().split("T")[0],
-  });
+    selectedCollateral: "PTT",
+    selectedBorrowToken: "mUSDT",
+    date: futureDate.toISOString().split("T")[0], // Set initial date to 30 days in future
+  })
+  
+  const [showActiveLoans, setShowActiveLoans] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [submitLoading, setSubmitLoading] = useState(false)
+  
+  const calculateCollateral = useCollateralCalculator()
+  const [collateralAmount, setCollateralAmount] = useState("0")
+
 
   const [showActiveLoans, setShowActiveLoans] = useState(false);
   const [submitLoading, setSubmitLoading] = useState(false);
@@ -147,8 +155,8 @@ const BorrowPage = () => {
         amount: "",
         duration: 30,
         maxInterestRate: 5.8,
-        selectedCollateral: "ETH",
-        selectedBorrowToken: "LINK",
+        selectedCollateral: "PTT",
+        selectedBorrowToken: "mUSDT",
         date: new Date().toISOString().split("T")[0],
       });
     } catch (error) {
@@ -216,7 +224,7 @@ const BorrowPage = () => {
             </div>
           ) : (
             <>
-              {renderStatCard("Total Liquidity", `${totalLiquidity} LINK`, "💧", marketLoading)}
+              {renderStatCard("Total Liquidity", `${totalLiquidity} mUSDT`, "💧", marketLoading)}
               {renderStatCard("Average Interest", `${avgInterestRate}%`, "📈", marketLoading)}
               {renderStatCard("My active Loans", activeLoans, "🔄", marketLoading)}
             </>
@@ -252,7 +260,10 @@ const BorrowPage = () => {
                         "url(\"data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e\")",
                     }}
                   >
-                    <option>LINK</option>
+                    <option>
+                    mUSDT
+                    </option>
+
                   </select>
                   <div className="flex-1 flex gap-2">
                     <input
@@ -333,10 +344,13 @@ const BorrowPage = () => {
                         "url(\"data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e\")",
                     }}
                   >
-                    <option>ETH</option>
+                    <option >
+                      PTT
+                    </option>
+
                   </select>
                   <div className="text-lg text-gray-300 flex-1">
-                    Required: {parseFloat(collateralAmount).toFixed(4)} ETH
+                    Required: {parseFloat(collateralAmount).toFixed(4)} PTT
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4 text-sm text-gray-400">
@@ -368,7 +382,10 @@ const BorrowPage = () => {
                   </div>
                   <div className="flex justify-between text-sm text-gray-400">
                     <span>Collateral</span>
-                    <span>{parseFloat(collateralAmount).toFixed(4)} ETH</span>
+                    <span>
+                      {parseFloat(collateralAmount).toFixed(4)} PTT
+                    </span>
+
                   </div>
                 </div>
               </div>
