@@ -7,7 +7,7 @@ import { useCollateralCalculator } from "../hooks/useCollateralCalculator";
 import useWithdrawRewards from "../hooks/useWithdrawRewards";
 import useGetOwnerAddress from "../hooks/useGetOwnerAddress";
 import { toast } from "react-toastify";
-import useGetContractLinkTBalance from "../hooks/useGetContractLinkTBalance";
+import useGetContractLinkBalance from "../hooks/useGetContractLinkBalance";
 
 const Card = ({ children, className }) => (
   <div className={`rounded-xl  ${className}`}>{children}</div>
@@ -30,7 +30,7 @@ const DashboardContent = () => {
   const { loanRequests } = useLoanRequests();
   const withdrawalHandler = useWithdrawRewards();
   const getOnwerAddress = useGetOwnerAddress();
-  const getContractBalance = useGetContractLinkTBalance();
+  const getContractBalance = useGetContractLinkBalance();
 
   const fetchLoanPaymentDetails = useCallback(async (loanId) => {
     try {
