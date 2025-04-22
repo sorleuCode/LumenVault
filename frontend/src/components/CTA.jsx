@@ -22,7 +22,7 @@ const CTA = () => {
           transition={{ delay: 0.2, duration: 0.5 }}
           className="text-xl mb-8 text-gray-300"
         >
-          Join LENDLINK today and experience the future of peer-to-peer lending and borrowing.
+          Join LUMENVAULT today and experience the future of peer-to-peer lending and borrowing.
         </motion.p>
         <motion.div
           initial={{ opacity: 0, y: 20 }}

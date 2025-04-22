@@ -72,10 +72,10 @@ const Footer = () => {
               Have questions? Reach out to our support team anytime.
             </p>
             <a
-              href="mailto:support@lendlink.com"
+              href="mailto:lumenvault001@gmail.com"
               className="text-gray-400 hover:text-white transition-colors"
             >
-              support@lendlink.com
+              lumenvault001@gmail.com
             </a>
           </motion.div>
 
@@ -110,7 +110,7 @@ const Footer = () => {
           className="pt-8 border-t border-white/10 text-center"
         >
           <p className="text-gray-400">
-            &copy; {new Date().getFullYear()} LENDLINK. All rights reserved.
+            &copy; {new Date().getFullYear()} LUMENVAULT. All rights reserved.
           </p>
         </motion.div>
       </div>

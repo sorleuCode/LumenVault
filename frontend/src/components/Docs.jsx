@@ -92,8 +92,9 @@ const Documentation = () => {
   const [openIntroduction, setOpenIntroduction] = useState(true);
   const [openGettingStarted, setOpenGettingStarted] = useState(false);
   const [openPlatformOverview, setOpenPlatformOverview] = useState(false);
-  const [openLendingOnLendlink, setOpenLendingOnLendlink] = useState(false);
-  const [openBorrowingOnLendlink, setOpenBorrowingOnLendlink] = useState(false);
+  const [openLendingOnlumenvault, setOpenLendingOnlumenvault] = useState(false);
+  const [openBorrowingOnlumenvault, setOpenBorrowingOnlumenvault] =
+    useState(false);
   const [selectedItem, setSelectedItem] = useState("Overview");
   const [activeSection, setActiveSection] = useState("");
 
@@ -144,7 +145,7 @@ const Documentation = () => {
     } else if (["How to Join"].includes(title)) {
       setActiveSection("Getting Started");
     } else if (["Managing Lending Pools"].includes(title)) {
-      setActiveSection("Lending on LENDLINK");
+      setActiveSection("Lending on LUMENVAULT");
     } else if (
       [
         "Creating a Borrow Order",
@@ -153,7 +154,7 @@ const Documentation = () => {
         "Repayment Process",
       ].includes(title)
     ) {
-      setActiveSection("Borrowing on LENDLINK");
+      setActiveSection("Borrowing on LUMENVAULT");
     } else if (["Contact and Support"].includes(title)) {
       setActiveSection("Contact and Support");
     }
@@ -205,7 +206,12 @@ const Documentation = () => {
                   onToggle={() =>
                     setOpenPlatformOverview(!openPlatformOverview)
                   }
-                >
+                >               
+                  <NavItem
+                    title="Mock Token & Test Assets"
+                    onItemClick={handleItemClick}
+                    selectedItem={selectedItem}
+                  />
                   <NavItem
                     title="How to Join"
                     onItemClick={handleItemClick}
@@ -214,12 +220,12 @@ const Documentation = () => {
                 </NavItem>
               </NavItem>
 
-              {/* Lending on LENDLINK */}
+              {/* Lending on LUMENVAULT */}
               <NavItem
-                title="Lending on LENDLINK"
-                isOpen={openLendingOnLendlink}
+                title="Lending on LUMENVAULT"
+                isOpen={openLendingOnlumenvault}
                 onToggle={() =>
-                  setOpenLendingOnLendlink(!openLendingOnLendlink)
+                  setOpenLendingOnlumenvault(!openLendingOnlumenvault)
                 }
               >
                 <NavItem
@@ -229,12 +235,12 @@ const Documentation = () => {
                 />
               </NavItem>
 
-              {/* Borrowing on LENDLINK */}
+              {/* Borrowing on LUMENVAULT */}
               <NavItem
-                title="Borrowing on LENDLINK"
-                isOpen={openBorrowingOnLendlink}
+                title="Borrowing on LUMENVAULT"
+                isOpen={openBorrowingOnlumenvault}
                 onToggle={() =>
-                  setOpenBorrowingOnLendlink(!openBorrowingOnLendlink)
+                  setOpenBorrowingOnlumenvault(!openBorrowingOnlumenvault)
                 }
               >
                 <NavItem
@@ -286,7 +292,7 @@ const Documentation = () => {
               {selectedItem === "Overview" && (
                 <div className="space-y-6">
                   <p className="text-gray-300 leading-relaxed">
-                    <strong>LENDLINK</strong> is a decentralized platform
+                    <strong>LUMENVAULT</strong> is a decentralized platform
                     leveraging blockchain technology to revolutionize
                     small-scale lending. Designed for individuals and
                     businesses, it offers secure, transparent, and inclusive
@@ -305,10 +311,10 @@ const Documentation = () => {
                 <div className="space-y-6">
                   <ul className="list-disc pl-5 text-gray-300 leading-relaxed space-y-4">
                     <li>
-                      <b>Collateralized Loans with ETH:</b> Borrowers can
-                      request loans by depositing Ether (ETH) as collateral. The
-                      loan amount is determined based on the collateral value
-                      and a predefined collateralization ratio.
+                      <b>Collateralized Loans with PTT:</b> Borrowers can
+                      request loans by depositing (PTT) as collateral.
+                      The loan amount is determined based on the collateral
+                      value and a predefined collateralization ratio.
                     </li>
                     <li>
                       <b>Dynamic Interest Rates:</b> Interest rates are
@@ -351,14 +357,14 @@ const Documentation = () => {
               {selectedItem === "Supported Assets" && (
                 <div className="space-y-6">
                   <p>
-                    Currently, <strong>LENDLINK</strong> operates on the{" "}
-                    <strong>Base Sepolia</strong> test network, supporting{" "}
-                    <strong>Ethereum ETH and Chainlink LINK</strong> as the
-                    primary assets. ETH is used as collateral for loans, while
-                    LINK is used as the loan currency. Plans to introduce
-                    additional assets (e.g., other ERC-20 tokens) and expand
-                    network support (e.g., Layer 2 solutions or other
-                    EVM-compatible chains) are in the roadmap.
+                    Currently, <strong>LUMENVAULT</strong> operates on the{" "}
+                    <strong>pharosDevnet</strong> network, supporting{" "}
+                    <strong>mUSDT and PTT</strong> as the primary assets. PTT is
+                    used as collateral for loans, while mUSDT is used as the loan
+                    currency. Plans to introduce additional assets (e.g., other
+                    ERC-20 tokens) and expand network support (e.g., Layer 2
+                    solutions or other EVM-compatible chains) are in the
+                    roadmap.
                   </p>
                 </div>
               )}
@@ -366,13 +372,20 @@ const Documentation = () => {
               {selectedItem === "Long-term Goals" && (
                 <div className="space-y-6">
                   <p>
-                    One of the long-term objectives of <strong>LENDLINK</strong>{" "}
-                    is to build a decentralized credit reputation system using
-                    on-chain loan history and borrower behavior. This
-                    transparent, trustless credit scoring mechanism will help
-                    users access better loan terms, higher borrowing limits, and
-                    broader DeFi opportunities.
+                    One of the long-term objectives of{" "}
+                    <strong>LUMENVAULT</strong> is to build a decentralized
+                    credit reputation system using on-chain loan history and
+                    borrower behavior. This transparent, trustless credit
+                    scoring mechanism will help users access better loan terms,
+                    higher borrowing limits, and broader DeFi opportunities.
                   </p>
+                </div>
+              )}
+
+              {selectedItem === "Mock Token & Test Assets" && (
+                <div className="space-y-6">
+                  <p>To interact with the protocol in the test environment, you’ll need access to the mock tokens:</p>
+                  <p><b>mUSDT</b> is a erc20 mock version of the USDT token deployed by the team. It is intended for development and testing purposes only. And also,iIt serves as the lending token. The  token has this contract address: 0xb88877a121B0e96c2c794dd68c8D507D584a64c3</p>
                 </div>
               )}
 
@@ -394,10 +407,10 @@ const Documentation = () => {
                     </li>
                     <li>
                       <b>Deposit Collateral (For Borrowers):</b> If you're a
-                      borrower, deposit Ethereum (ETH) as collateral to secure
-                      your loan. The required collateral amount is calculated
-                      based on the loan amount and the platform's
-                      collateralization ratio.
+                      borrower, deposit PTT as collateral to secure your
+                      loan. The required collateral amount is calculated based
+                      on the loan amount and the platform's collateralization
+                      ratio.
                     </li>
                     <li>
                       <b>Request or Fund a Loan:</b>
@@ -410,7 +423,7 @@ const Documentation = () => {
                         </li>
                         <li>
                           Lenders: Browse available loan requests or create your
-                          own lending terms. Fund loans using Chainlink (LINK)
+                          own lending terms. Fund loans using (mUSDT)
                           tokens to earn interest.
                         </li>
                       </ul>
@@ -465,9 +478,9 @@ const Documentation = () => {
                       smart contract.
                     </li>
                     <li>
-                      <b>Deposit Collateral:</b> Deposit Ethereum (ETH) as
+                      <b>Deposit Collateral:</b> Deposit (PTT) as
                       collateral to secure your loan. The required collateral
-                      amount is calculated based on the loan amount and the
+                      amount is determined based on your loan amount and the
                       platform’s collateralization ratio.
                     </li>
                     <li>
@@ -486,13 +499,13 @@ const Documentation = () => {
               {selectedItem === "Depositing Collateral" && (
                 <div className="space-y-6">
                   <p>
-                    <strong>LENDLINK</strong> requires borrowers to deposit
+                    <strong>LUMENVAULT</strong> requires borrowers to deposit
                     collateral to secure their loans, ensuring lender protection
                     in case of non-repayment.
                   </p>
                   <ul className="list-disc pl-5 text-gray-300 leading-relaxed space-y-4">
                     <li>
-                      <strong>Supported Collateral:</strong> Sepolia ETH (for
+                      <strong>Supported Collateral:</strong> PTT (for
                       collateral deposit).
                     </li>
                     <li>
@@ -521,9 +534,9 @@ const Documentation = () => {
 
                   <ul className="list-disc pl-5 text-gray-300 leading-relaxed space-y-4">
                     <li>
-                      For example, if you request a loan of 1,000 LINK tokens
+                      For example, if you request a loan of 1,000 mUSDT tokens
                       (worth $1,000), you will need to deposit at least $1,200
-                      worth of collateral (ETH). Maintaining a Healthy LTV
+                      worth of collateral (PTT). Maintaining a Healthy LTV
                     </li>
                     <h1 className="text-2xl font-bold text-white mb-8">
                       Maintaining a Healthy LTV
@@ -544,19 +557,19 @@ const Documentation = () => {
               {selectedItem === "Repayment Process" && (
                 <div className="space-y-6">
                   <p>
-                    Repaying your loan on <strong>LENDLINK</strong> is simple:
+                    Repaying your loan on <strong>LUMENVAULT</strong> is simple:
                   </p>
 
                   <ul className="list-disc pl-5 text-gray-300 leading-relaxed space-y-4">
                     <li>
                       Manual Repayment: You can repay the loan early, including
                       partial repayments, to reduce interest or avoid
-                      liquidation risks. Repayments are made in LINK.
+                      liquidation risks. Repayments are made in mUSDT.
                     </li>
                     <li>
                       Collateral Return: Once your loan is fully repaid,
                       including the principal and interest, your collateral
-                      (ETH) will be automatically returned. The collateral can
+                      (PTT) will be automatically returned. The collateral can
                       then be used for future loans, or withdrawn.
                     </li>
                   </ul>
@@ -566,7 +579,7 @@ const Documentation = () => {
               {selectedItem === "Contact and Support" && (
                 <div className="space-y-6">
                   <p>
-                    Information on how to contact LENDLINK support team and
+                    Information on how to contact LUMENVAULT support team and
                     engage with the community for assistance and discussions.
                   </p>
                   <h3 className="text-2xl font-bold text-white mb-8">
@@ -574,15 +587,15 @@ const Documentation = () => {
                   </h3>
                   <p>
                     If you need assistance or have questions about using the
-                    LENDLINK platform, our support team is here to help. Whether
-                    you have technical issues, need guidance on lending or
-                    borrowing, or want to learn more about platform features,
+                    LUMENVAULT platform, our support team is here to help.
+                    Whether you have technical issues, need guidance on lending
+                    or borrowing, or want to learn more about platform features,
                     our dedicated team is available to provide the support you
                     need.
                   </p>
 
                   <li>
-                    <strong>Support:</strong> support@lendlink.com
+                    <strong>Support:</strong> lumenvault@gmail.com
                   </li>
                 </div>
               )}
