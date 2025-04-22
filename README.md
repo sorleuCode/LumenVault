@@ -1,17 +1,17 @@
-# Lend-Link, A micro-loan with Interest
+# LumenVault, A micro-loan with Interest
 
 ### Empowering Peer-to-Peer Lending with Blockchain Technology
 
 ---
 
-## Project Overview
-**Lend-Link** is a decentralized platform designed to facilitate small-scale loans for individuals and businesses, ensuring transparency, security, and accessibility. By leveraging blockchain technology, the platform eliminates inefficiencies in traditional lending systems, such as high fees, slow processing times, and lack of inclusivity.
+## 🌍Project Overview
+**LumenVault** is a decentralized platform designed to facilitate small-scale loans for individuals and businesses, ensuring transparency, security, and accessibility. By leveraging blockchain technology, the platform eliminates inefficiencies in traditional lending systems, such as high fees, slow processing times, and lack of inclusivity.
 
-Borrowers can access micro-loans seamlessly, while lenders earn interest in a trustless environment supported by smart contracts on the CrossFI blockchain.
+Borrowers can access micro-loans seamlessly, while lenders earn interest in a trustless environment supported by smart contracts on the Pharos blockchain.
 
 ---
 
-## Key Features
+## 🚀Key Features
 ### 1. **Blockchain-Powered Loan System**
 - Borrowers can request loans by specifying the amount, interest rate, and repayment duration.
 - Smart contracts ensure secure, automated matching between borrowers and lenders.
@@ -34,9 +34,9 @@ Borrowers can access micro-loans seamlessly, while lenders earn interest in a tr
 
 ---
 
-## Why Lend-Link?
+## Why LumenVault?
 - **Decentralized**: Operates without intermediaries, reducing costs and improving trust.
-- **Fast and Cost-Effective**: Powered by the CrossFI blockchain for low fees and high-speed transactions.
+- **Fast and Cost-Effective**: Powered by the Pharos blockchain for low fees and high-speed transactions.
 - **Inclusive**: Designed to serve individuals and businesses with limited access to traditional lending.
 - **Secure**: Implements encryption and privacy measures for data protection.
 
@@ -52,14 +52,14 @@ Borrowers can access micro-loans seamlessly, while lenders earn interest in a tr
 ---
 
 ## Tech Stack
-- **Blockchain**: CrossFI
+- **Blockchain**: Pharos
 - **Smart Contracts**: Solidity
 - **Frontend**: React.js
 - **Database**: IPFS.
 
 ---
 
-## Installation
+## 📌Installation
 Follow the steps below to set up the project:
 
 ### Prerequisites
@@ -70,11 +70,11 @@ Follow the steps below to set up the project:
 ### Steps
 1. Clone the repository:
    ```bash
-   git clone https://github.com/Kenny001_spec/Lend-Link.git
+   git clone https://github.com/sorleuCode/LumenVault.git
 
 2. Navigate to the project's directory :
    ```bash
-   cd Lend-Link
+   cd LumenVault
 
 3. Install dependencies:
    ```bash
@@ -84,7 +84,7 @@ Follow the steps below to set up the project:
    ```bash
    npm run dev
 
-### Contribution Guidelines
+### 👩‍💻Contribution Guidelines
 We welcome contributions to the Micro-Loan System with Interest! To get started:
 
 1. Fork the repository.
@@ -101,16 +101,13 @@ We welcome contributions to the Micro-Loan System with Interest! To get started:
 4. Open a Pull Request
 
 
-### License
+### 📝License
 This project is licensed under the MIT License.
 
 
-### Contact
-For more information or questions, feel free to reach out:
+### 📞Contact
+**Email:** soliumuhammed953@gmail.com
 
-**Project Contributor:** [Muhammed Soliu](https://github.com/sorleuCode)
-**Email:** abubakarkehinde88@gmail.com
-**Twitter:** [kennySpec](https://x.com/kennySpec)
 
 
 

@@ -26,7 +26,7 @@ const AppHeader = () => {
               </motion.div>
 
               <span className="text-lg sm:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-blue-300">
-                LENDLINK
+                LUMENVAULT
               </span>
             </Link>
           </div>
