@@ -202,6 +202,7 @@ const BorrowPage = () => {
       }
     } catch (error) {
       console.error("Error repaying loan:", error)
+      
       toast.error(error.message || "Failed to repay loan")
     } finally{
       setIsLoading(false)
