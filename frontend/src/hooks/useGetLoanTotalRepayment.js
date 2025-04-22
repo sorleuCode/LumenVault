@@ -44,7 +44,6 @@ const useGetLoanTotalRepayment = () => {
                 const decodedError = await errorDecoder.decode(error);
 
                 console.error("Error requesting loan", decodedError);
-                toast.error("Repayment price failed to fetch", decodedError);
             }
         },
         [contract, address, chainId]

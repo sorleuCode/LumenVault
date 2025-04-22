@@ -3,37 +3,27 @@ import useContractInstance from "./useContractInstance";
 import { useAppKitAccount, useAppKitNetwork } from "@reown/appkit/react";
 import { toast } from "react-toastify";
 import { ErrorDecoder } from "ethers-decode-error";
-import { Contract, parseUnits } from "ethers";
-import usdtTokenABI from "../ABI/usdtToken.json"
+import { Contract, ethers, parseUnits } from "ethers";
+import usdtTokenABI from "../ABI/usdtToken.json";
 import useSignerOrProvider from "./useSignerOrProvider";
-
 
 const useRepayLoan = () => {
   const contract = useContractInstance(true);
   const { address } = useAppKitAccount();
   const { chainId } = useAppKitNetwork();
   const usdtTokenContractAddress = import.meta.env.VITE_USDT_TOKEN_CONTRACT_ADDRESS;
-  const lumenVaultContractAddress = import.meta.env.VITE_LUMEN_VAULT_CONTRACT_ADDRESS
+  const lumenVaultContractAddress = import.meta.env.VITE_LUMEN_VAULT_CONTRACT_ADDRESS;
 
   const { signer } = useSignerOrProvider();
-
   const usdtContract = new Contract(usdtTokenContractAddress, usdtTokenABI, signer);
 
   return useCallback(
     async (loanId, repayment) => {
 
-      console.log({repayment})
-
-      const numRepayment = Number(repayment);
-      const twiceRepayment = numRepayment * 2;
-      const stringRepayment = String(repayment)
-
-      console.log({stringRepayment, loanId})
       if (!loanId) {
-        toast.error("Invalid loan");
+        toast.error("Invalid loan ID");
         return;
       }
-
 
       if (!address) {
         toast.error("Please connect your wallet");
@@ -45,53 +35,125 @@ const useRepayLoan = () => {
         return;
       }
 
+      if (Number(chainId) !== 50002) {
+        toast.error("Please connect to Base Sepolia");
+        return;
+      }
+
+
+      
+      console.log("Repaying loan with params:", {
+        loanId: loanId.toString(),
+        repayment: repayment,
+        contract: contract.target,
+        usdtContract: usdtContract.target,
+        chainId,
+        user: address,
+      });
+
+
 
       try {
+        const repaymenInNum = Number(repayment);
 
-        // const estimatedGas = await usdtTokenContractAddress?.approve?.estimateGas(
-        //   lumenVaultContractAddress,
-        //     parseUnits(repayment, 18)
-        // );
+        const bigIntRepayment = parseUnits((repaymenInNum * 2).toString(), 18)
+        if (repaymenInNum <= 0) {
+          toast.error("Repayment amount must be greater than 0");
+          return;
+        }
 
-        // if (!estimatedGas) {
-        //   toast.error("Gas estimation failed");
-        //   return;
-        // }
+        console.log("Repaying loan with params:", {
+          loanId: loanId.toString(),
+          repayment: repaymenInNum.toString(),
+          contract: contract.target,
+          usdtContract: usdtContract.target,
+          chainId,
+          user: address,
+        });
 
-        const tx = await usdtContract.approve(lumenVaultContractAddress, parseUnits('3', 18));
+        // Approve USDT transfer
+        let estimatedGas;
+        try {
+          estimatedGas = await usdtContract.approve.estimateGas(
+            lumenVaultContractAddress,
+            bigIntRepayment
+          );
+        } catch (estimateErr) {
+          console.warn("Gas estimation for approve failed:", estimateErr);
+          toast.error("Failed to estimate gas for approval");
+          return;
+        }
 
-        
-        const trxReceipt = await tx.wait()
+        const approveTx = await usdtContract.approve(lumenVaultContractAddress, bigIntRepayment, {
+          gasLimit: (estimatedGas * BigInt(120)) / BigInt(100),
+          gasPrice: ethers.parseUnits("1", "gwei"), // Fallback for non-EIP-1559
+        });
 
-        if (trxReceipt.status === 1) {
-          // const estimatedGasLoan = await contract.repayLoanWithReward.estimateGas(loanId);
+        console.log("Approval transaction sent:", { txHash: approveTx.hash });
 
-          // if (!estimatedGasLoan) {
-          //   toast.error("Gas estimation for loan failed");
-          //   return;
-          // }
+        const approveReceipt = await approveTx.wait();
+        console.log("Approval receipt:", {
+          status: approveReceipt.status,
+          transactionHash: approveReceipt.transactionHash,
+          blockNumber: approveReceipt.blockNumber,
+        });
 
-          const txLoan = await contract.repayLoanWithReward(loanId);
+        if (approveReceipt.status !== 1) {
+          toast.error("USDT approval failed");
+          return;
+        }
 
-          const trxReceipt = await txLoan.wait();
+        // Repay loan
+        let estimatedGasLoan;
+        try {
+          estimatedGasLoan = await contract.repayLoanWithReward.estimateGas(loanId);
+        } catch (estimateErr) {
+          console.warn("Gas estimation for repayLoanWithReward failed:", estimateErr);
+          toast.error("Failed to estimate gas for loan repayment");
+          return;
+        }
 
-          if (trxReceipt.status === 1) {
-            toast.success("Loan repaid successfully!")
-            return true;
-          }
+        const repayTx = await contract.repayLoanWithReward(loanId, {
+          gasLimit: (estimatedGasLoan * BigInt(120)) / BigInt(100),
+          gasPrice: ethers.parseUnits("1", "gwei"), // Fallback for non-EIP-1559
+        });
 
-          toast.error("Failed to repay loan");
+        console.log("Repayment transaction sent:", { txHash: repayTx.hash });
+
+        const repayReceipt = await repayTx.wait();
+        console.log("Repayment receipt:", {
+          status: repayReceipt.status,
+          transactionHash: repayReceipt.transactionHash,
+          blockNumber: repayReceipt.blockNumber,
+        });
+
+        if (repayReceipt.status === 1) {
+          toast.success("Loan repaid successfully!");
+          return true;
         } else {
-          toast.error("Approval failed");
+          toast.error("Loan repayment failed");
+          return;
         }
       } catch (error) {
-        console.error("Error repaying loan", error);
 
-        const errorDecoder = ErrorDecoder.create();
-        const decodedError = await errorDecoder.decode(error);
+        console.error("Error repaying loan:", error);
 
-        console.error("Decoded Error:", decodedError);
-        toast.error("Loan repayment failed", decodedError);
+        try {
+          const errorDecoder = ErrorDecoder.create();
+          const decodedError = await errorDecoder.decode(error);
+          console.error("Decoded error:", decodedError);
+
+          let errorMessage = "Loan repayment failed";
+          if (decodedError?.reason) {
+            errorMessage = `Loan repayment failed: ${decodedError.reason}`;
+          } else if (decodedError?.errorName) {
+            errorMessage = `Loan repayment failed: ${decodedError.errorName}`;
+          }
+          toast.error(errorMessage);
+        } catch (decodeErr) {
+          console.error("Error decoding the error:", decodeErr);
+          toast.error("Loan repayment failed: Unknown issue");
+        }
       }
     },
     [contract, address, chainId, usdtContract]
@@ -99,4 +161,3 @@ const useRepayLoan = () => {
 };
 
 export default useRepayLoan;
-

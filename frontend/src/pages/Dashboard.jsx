@@ -62,11 +62,14 @@ const DashboardContent = () => {
       setOwnerAddress(ownerAddress);
 
       const balance = await getContractBalance();
+
+      console.log({ContractBalance: balance});
+
       setContractBalance(Number(balance));
     };
 
     fetchOwnerAddress();
-  }, []);
+  }, [, contractBalance, ownerAddress]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -132,7 +135,8 @@ const DashboardContent = () => {
                 <h3 className="text-lg font-semibold text-gray-100 mb-4">Withdraw Rewards</h3>
                 <div className="mb-4">
                   <p className="text-gray-400 text-sm mb-1">Contract Balance:</p>
-                  <p className="text-gray-100 text-xl font-bold">{Number(contractBalance).toFixed(3)} PTT</p>
+
+                  <p className="text-gray-100 text-xl font-bold">{Number(contractBalance).toFixed(3)} mUSDT</p>
                 </div>
               </div>
 

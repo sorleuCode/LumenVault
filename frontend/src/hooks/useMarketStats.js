@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { toast } from 'react-toastify';
 import { useLoanRequests } from '../context/LoanContext.jsx';
 import { useAppKitAccount } from '@reown/appkit/react';
 
@@ -62,7 +61,6 @@ export const useMarketStats = () => {
         });
       } catch (error) {
         console.error('Error fetching market stats:', error);
-        toast.error('Failed to fetch market statistics');
       } finally {
         setLoading(false);
       }
