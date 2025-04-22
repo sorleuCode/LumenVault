@@ -134,7 +134,7 @@ const DashboardContent = () => {
               <div className="flex justify-between items-end">
                 <h3 className=" text-[14px] md:text-lg font-semibold sm:text-base text-gray-100 mb-4">Contract Balance:</h3>
                 <div className="mb-4">
-                  <p className="text-gray-100 text-[14px] md:text-lg sm:text-base font-light">{Number(contractBalance).toFixed(2)} mUSDT</p>
+                  <p className="text-gray-100 text-[14px] md:text-lg sm:text-base font-light">{Number(contractBalance).toFixed(3)} mUSDT</p>
                 </div>
               </div>
 
