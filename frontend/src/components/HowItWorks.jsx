@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { UserPlus, Search, DollarSign, RefreshCw, Smartphone, BarChart } from 'lucide-react';
 
 const steps = [
-  { icon: UserPlus, title: 'Create an Account', description: 'Sign up and verify your identity on the LENDLINK platform using secure blockchain-based authentication.' },
+  { icon: UserPlus, title: 'Create an Account', description: 'Connect your wallet (e.g., MetaMask) to the LUMENVAULT platform using secure blockchain-based authentication.' },
   { icon: Search, title: 'Browse Loans', description: 'Explore available loan offers or create a loan request with our intuitive dashboard.' },
   { icon: DollarSign, title: 'Lend or Borrow', description: 'Choose to lend funds or apply for a loan that suits your needs with flexible terms.' },
   { icon: RefreshCw, title: 'Manage Transactions', description: 'Track repayments, interest accrual, and loan status in real-time with detailed insights.' },

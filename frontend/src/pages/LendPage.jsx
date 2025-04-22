@@ -51,24 +51,50 @@ const LendingPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 text-white p-8">
+    <div className="min-h-screen bg-[#0B1120] text-white p-8">
       <div className="max-w-7xl mx-auto">
         {/* Header Section */}
         <div className="mb-12">
-          <div className="flex justify-between items-center mb-8">
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-              Lending Dashboard
-            </h1>
-          </div>
+          <h1 className="text-4xl md:text-5xl font-bold text-center mb-8">
+            <span className="bg-gradient-to-r from-blue-500 to-blue-300 bg-clip-text text-transparent">
+              Lending
+            </span>{" "}
+            Dashboard
+          </h1>
 
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             {[
-              { label: "Available Loans", value: stats.totalLoans },
-              { label: "Avg Interest Rate", value: `${isNaN(stats.avgInterestRate) ? 0 : stats.avgInterestRate}%` },
+              {
+                label: "Available Loans",
+                value: stats.totalLoans,
+                icon: Shield,
+              },
+              {
+                label: "Avg Interest Rate",
+                value: `${
+                  isNaN(stats.avgInterestRate) ? 0 : stats.avgInterestRate
+                }%`,
+                icon: TrendingUp,
+              },
             ].map((stat, index) => (
-              <div key={index} className="bg-gray-800 p-6 rounded-lg border border-gray-700 hover:border-gray-600 transition-all">
-                <h3 className="text-lg text-gray-400 mb-2">{stat.label}</h3>
-                <p className="text-3xl font-bold text-blue-400">{stat.value}</p>
+              <div
+                key={index}
+                className="relative overflow-hidden bg-[#1B2333] p-6 rounded-lg border border-[#2A3441] hover:border-blue-500/50 transition-all duration-300"
+              >
+                <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/10 rounded-bl-full" />
+                <div className="relative z-10">
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 bg-blue-500/10 rounded-xl">
+                      <stat.icon className="h-6 w-6 text-blue-400" />
+                    </div>
+                    <div>
+                      <h3 className="text-sm text-blue-400">{stat.label}</h3>
+                      <p className="text-2xl font-bold text-white mt-1">
+                        {stat.value}
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </div>
             ))}
           </div>
@@ -80,10 +106,10 @@ const LendingPage = () => {
             <button
               key={filter}
               onClick={() => setFilterStatus(filter)}
-              className={`px-4 py-2 rounded-md transition-colors ${
+              className={`px-6 py-3 rounded-lg transition-all text-sm font-medium ${
                 filterStatus === filter 
-                  ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white' 
-                  : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                  ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/20' 
+                  : 'bg-[#1B2333] text-gray-300 hover:bg-[#2A3441] border border-[#2A3441]'
               }`}
             >
               {filter.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
@@ -92,22 +118,24 @@ const LendingPage = () => {
         </div>
 
         {/* Loans Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {noneActiveLoans
             .filter((loan) => filterStatus === 'high_yield' ? parseFloat(loan.maxInterestRate) > 5 : true)
             .map((loan) => !(String(loan.borrower).toString().toLowerCase() === address.toLowerCase()) && (
-              <div key={loan.loanId} className="bg-gray-800 rounded-lg border border-gray-700 hover:border-gray-600 transition-all">
+              <div key={loan.loanId} className="group bg-[#1B2333] rounded-lg border border-[#2A3441] hover:border-blue-500/50 transition-all">
                 <div className="p-6">
-                  <div className="flex justify-between items-start mb-4">
+                  <div className="flex justify-between items-start mb-6">
                     <div>
-                      <h3 className="text-xl font-bold mb-1">
-                        {loan.amount} LINK
+                      <h3 className="text-2xl font-bold text-white group-hover:text-blue-400 transition-colors">
+                        {loan.amount} mUSDT
                       </h3>
-                      <p className="text-gray-400">
-                        Collateral: {Number(loan.collateralAmount).toFixed(3)} ETH
+                      <p className="text-blue-400/80 mt-1">
+                        Collateral: {Number(loan.collateralAmount).toFixed(3)} PTT
                       </p>
                     </div>
-                    <Shield className="h-5 w-5 text-blue-400" />
+                    <div className="p-2 bg-blue-500/10 rounded-xl">
+                      <Shield className="h-5 w-5 text-blue-400" />
+                    </div>
                   </div>
 
                   <div className="space-y-4">
@@ -131,7 +159,7 @@ const LendingPage = () => {
                     <div className="pt-1 flex items-center justify-between">
                       <div className="text-sm text-gray-400">Amount:</div>
                       <div className="text-sm text-gray-400">
-                        {loan.amount} LINK
+                        {loan.amount} mUSDT
                       </div>
                     </div>
 
@@ -182,11 +210,11 @@ const LendingPage = () => {
             <div className="space-y-4">
               <div className="flex justify-between items-center">
                 <span className="text-gray-400">Amount to Fund</span>
-                <span className="font-medium">{selectedLoan.amount} LINK</span>
+                <span className="font-medium">{selectedLoan.amount} mUSDT</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-gray-400">Collateral</span>
-                <span className="font-medium">{Number(selectedLoan.collateralAmount).toFixed(3)} ETH</span>
+                <span className="font-medium">{Number(selectedLoan.collateralAmount).toFixed(3)} PTT</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-gray-400">Interest Rate</span>
@@ -197,7 +225,7 @@ const LendingPage = () => {
                 <AlertCircle className="h-5 w-5 mr-3 mt-0.5 text-blue-400" />
                 <div>
                   <h4 className="font-medium mb-1">Information</h4>
-                  <p className="text-sm text-gray-300">Make sure you have enough LINK tokens in your wallet before funding.</p>
+                  <p className="text-sm text-gray-300">Make sure you have enough mUSDT tokens in your wallet before funding.</p>
                 </div>
               </div>
 

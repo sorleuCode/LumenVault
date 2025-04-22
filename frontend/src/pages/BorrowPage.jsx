@@ -42,8 +42,8 @@ const BorrowPage = () => {
     amount: "",
     duration: 0,
     maxInterestRate: 0,
-    selectedCollateral: "ETH",
-    selectedBorrowToken: "LINK",
+    selectedCollateral: "PTT",
+    selectedBorrowToken: "mUSDT",
     date: futureDate.toISOString().split("T")[0], // Set initial date to 30 days in future
   })
   
@@ -177,8 +177,8 @@ const BorrowPage = () => {
         amount: "",
         duration: 30,
         maxInterestRate: 5.8,
-        selectedCollateral: "ETH",
-        selectedBorrowToken: "LINK",
+        selectedCollateral: "PTT",
+        selectedBorrowToken: "mUSDT",
         date: new Date().toISOString().split("T")[0],
       })
 
@@ -246,7 +246,7 @@ const BorrowPage = () => {
             </div>
           ) : (
             <>
-              {renderStatCard("Total Liquidity", `${totalLiquidity} LINK`, "💧", marketLoading)}
+              {renderStatCard("Total Liquidity", `${totalLiquidity} mUSDT`, "💧", marketLoading)}
               {renderStatCard("Average Interest", `${avgInterestRate}%`, "📈", marketLoading)}
               {renderStatCard("My active Loans", activeLoans, "🔄", marketLoading)}
             </>
@@ -286,7 +286,7 @@ const BorrowPage = () => {
                     }}
                   >
                     <option>
-                      LINK
+                    mUSDT
                     </option>
                   </select>
                   <div className="flex-1 flex gap-2">
@@ -374,12 +374,12 @@ const BorrowPage = () => {
                     }}
                   >
                     <option >
-                      ETH
+                      PTT
                     </option>
 
                   </select>
                   <div className="text-lg text-gray-300 flex-1">
-                    Required: {parseFloat(collateralAmount).toFixed(4)} ETH
+                    Required: {parseFloat(collateralAmount).toFixed(4)} PTT
                   </div>
 
                 </div>
@@ -415,7 +415,7 @@ const BorrowPage = () => {
                   <div className="flex justify-between text-sm text-gray-400">
                     <span>Collateral</span>
                     <span>
-                      {parseFloat(collateralAmount).toFixed(4)} ETH
+                      {parseFloat(collateralAmount).toFixed(4)} PTT
                     </span>
                   </div>
 
