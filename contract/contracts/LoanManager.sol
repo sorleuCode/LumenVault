@@ -13,11 +13,11 @@ import "./storage/LoanStorage.sol";
 contract LoanManager is ILoanManager, LoanStorage, ReentrancyGuard, Pausable {
     using CollateralUtils for uint256;
 
-    IERC20 public usdtToken; // Mock USDT as the loan currency
+    IERC20 public usdtToken; 
     address public owner;
 
-    uint256 public nativeUsdtPrice; // Manual Native Token/USDT price (e.g., 1 PHS = 0.05 USDT)
-    uint8 public priceDecimals = 18; // Fixed decimals for manual price feed
+    uint256 public nativeUsdtPrice; 
+    uint8 public priceDecimals = 18; 
 
     uint256 public collateralizationRatio = 120; // 120%
     uint256 public liquidationThreshold = 110; // 110%
@@ -52,7 +52,7 @@ contract LoanManager is ILoanManager, LoanStorage, ReentrancyGuard, Pausable {
         uint256 amount,
         uint256 maxInterestRate,
         uint256 duration
-    ) external payable override whenNotPaused nonReentrant {
+    ) external payable override  nonReentrant {
         require(amount >= minLoanAmount && amount <= maxLoanAmount, "Invalid loan amount");
 
         uint256 nativePrice = getNativePrice();
@@ -91,28 +91,42 @@ contract LoanManager is ILoanManager, LoanStorage, ReentrancyGuard, Pausable {
         }
     }
 
-    function fundLoan(uint256 loanId) external whenNotPaused nonReentrant {
+   function fundLoan(uint256 loanId) external whenNotPaused nonReentrant {
         LoanCore storage loan = loansCore[loanId];
         LoanStatus storage status = loansStatus[loanId];
 
+        // Ensure the loan is not already active
         require(!status.active, "Loan already active");
         require(loan.lender == address(0), "Loan already funded");
-        require(usdtToken.allowance(msg.sender, address(this)) >= loan.amount, "Insufficient allowance");
+        require(
+            usdtToken.allowance(msg.sender, address(this)) >= loan.amount,
+            "Insufficient allowance for this user"
+        );
 
-        require(usdtToken.transferFrom(msg.sender, address(this), loan.amount), "Transfer failed");
+        // Transfer the loan amount from lender to the contract
+        require(
+            usdtToken.transferFrom(msg.sender, address(this), loan.amount),
+            "Transfer failed"
+        );
 
+        // Mark the loan as funded and active
         loan.lender = msg.sender;
         status.startTime = block.timestamp;
         status.active = true;
 
-        require(usdtToken.transfer(loan.borrower, loan.amount), "Loan disbursement failed");
+        // Disburse the loan amount to the borrower
+        require(
+            usdtToken.transfer(loan.borrower, loan.amount),
+            "Loan disbursement failed"
+        );
 
+        // Record the loan in the lender's and borrower's loan records
         lenderLoans[msg.sender].push(loanId);
         borrowerLoans[loan.borrower].push(loanId);
         AllLoansID.push(loanId);
 
         emit LoanFunded(loanId, msg.sender);
-        emit LoanDisbursed(loanId, loan.borrower, loan.amount);
+        emit LoanDisbursed(loanId, loan.borrower, loan.amount); // New event to indicate loan disbursement
     }
 
     function makePartialRepayment(uint256 loanId, uint256 amount) external override whenNotPaused nonReentrant {
@@ -175,7 +189,9 @@ contract LoanManager is ILoanManager, LoanStorage, ReentrancyGuard, Pausable {
         emit InterestAccrued(loanId, accrued);
     }
 
-    function repayLoanWithReward(uint256 loanId) external whenNotPaused nonReentrant {
+        function repayLoanWithReward(
+        uint256 loanId
+    ) external whenNotPaused nonReentrant {
         LoanCore storage loan = loansCore[loanId];
         LoanStatus storage status = loansStatus[loanId];
         LoanInterest storage interest = loansInterest[loanId];
@@ -183,35 +199,52 @@ contract LoanManager is ILoanManager, LoanStorage, ReentrancyGuard, Pausable {
         require(status.active, "Loan not active");
         require(msg.sender == loan.borrower, "Not borrower");
 
-        accrueInterest(loanId);
+        // First, accrue interest before repayment
+         accrueInterest(loanId); // This will calculate and update interest first
 
+        // Calculate the total interest accrued so far
         uint256 totalInterest = interest.accruedInterest;
-        require(totalInterest > 0, "No interest accrued!");
 
-        uint256 reward = (totalInterest * 20) / 100;
-        uint256 lenderInterest = totalInterest - reward;
+        require(totalInterest > 0, "no interest accrued!");
 
-        interest.lastInterestAccrualTimestamp = block.timestamp;
+        // Deduct the total interest from the repayment amount
+        uint256 reward = (totalInterest * 20) / 100; // 20% of interest as reward
+        uint256 lenderInterest = totalInterest - reward; // Remaining interest for lender
 
-        uint256 totalRepayment = loan.amount + totalInterest - status.repaidAmount;
+        // Update accrued interest and timestamps
+        interest.lastInterestAccrualTimestamp = block.timestamp; // Update timestamp
+
+        // Calculate total repayment (principal + remaining interest - already repaid)
+        uint256 totalRepayment = loan.amount +
+            totalInterest -
+            status.repaidAmount;
 
         require(totalRepayment > loan.amount, "Interest not calculated");
         require(reward > 0, "No reward calculated");
 
-        require(usdtToken.transferFrom(msg.sender, address(this), totalRepayment), "Transfer failed");
+        require(
+            usdtToken.transferFrom(msg.sender, address(this), totalRepayment),
+            "Transfer failed"
+        );
 
+        // Transfer lender's share (principal + lender's portion of interest)
         uint256 amountToLender = loan.amount + lenderInterest;
-        require(usdtToken.transfer(loan.lender, amountToLender), "Transfer to lender failed");
+        require(
+            usdtToken.transfer(loan.lender, amountToLender),
+            "Transfer to lender failed"
+        );
 
-        status.repaidAmount += totalRepayment;
-        status.active = false;
+        // Update loan status
+        status.repaidAmount += totalRepayment; // Add repayment to the total
+        status.active = false; // Mark loan as fully repaid
         status.repaid = true;
         status.defaulted = false;
 
+        // Return collateral to borrower
         returnCollateral(loanId);
 
         emit LoanRepaid(loanId, msg.sender, totalRepayment);
-        emit RewardCollected(loanId, reward);
+        emit RewardCollected(loanId, reward); // Emit reward collection event
     }
 
     function getTotalLoanPayment(uint256 loanId) public view returns (uint256 totalPayment, uint256 principal, uint256 interestAmount) {
@@ -251,7 +284,7 @@ contract LoanManager is ILoanManager, LoanStorage, ReentrancyGuard, Pausable {
         return (totalPayment, principal, interestAmount);
     }
 
-    function liquidateOverdueLoan(uint256 loanId) external whenNotPaused nonReentrant {
+    function liquidateOverdueLoan(uint256 loanId) external  nonReentrant {
         LoanCore storage loan = loansCore[loanId];
         LoanStatus storage status = loansStatus[loanId];
         LoanRequest storage request = loanRequests[loanId];

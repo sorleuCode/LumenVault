@@ -12,6 +12,8 @@ const useGetContractLinkBalance = () => {
   const { chainId } = useAppKitNetwork();
   const { readOnlyProvider } = useSignerOrProvider()
   const usdtTokenContractAddress = import.meta.env.VITE_USDT_TOKEN_CONTRACT_ADDRESS;
+  const lumenVaultContractAddress = import.meta.env.VITE_LUMEN_VAULT_CONTRACT_ADDRESS;
+
 
 
 
@@ -19,7 +21,7 @@ const useGetContractLinkBalance = () => {
 
   return useCallback(
     async () => {
-      
+
       if (!usdtTokenContract) {
         toast.error("Contract not found");
         return;
@@ -30,13 +32,13 @@ const useGetContractLinkBalance = () => {
 
 
 
-        const contractLinkBalance = await usdtTokenContract.balanceOf(String(usdtTokenContractAddress).toString());
+        const contractLinkBalance = await usdtTokenContract.balanceOf(String(lumenVaultContractAddress).toString());
 
-            console.log({contractLinkBalance})
-            return formatUnits(String(contractLinkBalance), 18)
+        console.log({ contractLinkBalance })
+        return formatUnits(String(contractLinkBalance), 18)
 
 
-        
+
       } catch (error) {
         console.error("error fetching balance", error);
 
@@ -44,10 +46,9 @@ const useGetContractLinkBalance = () => {
         const decodedError = await errorDecoder.decode(error);
 
         console.error("Decoded Error:", decodedError);
-        toast.error("error fetching balance", decodedError);
       }
     },
-    [ address, chainId, usdtTokenContract]
+    [address, chainId, usdtTokenContract]
   );
 };
 

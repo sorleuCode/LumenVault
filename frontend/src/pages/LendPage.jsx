@@ -36,8 +36,9 @@ const LendingPage = () => {
     if (loading) return;
     setLoading(true);
     if (selectedLoan) {
+      console.log({selectedLoan})
       try {
-        const result = await handleFundLoan(selectedLoan.loanId, parseUnits(selectedLoan.amount, 18));
+        const result = await handleFundLoan(selectedLoan.loanId, parseUnits(Math.round(Number(selectedLoan.amount)).toString(), 18));
         if (result) {
           setLoading(false);
           setIsModalOpen(false);
@@ -203,7 +204,7 @@ const LendingPage = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
           <div className="bg-gray-800 rounded-lg max-w-md w-full p-6 border border-gray-700">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold">Fund Loan #{selectedLoan.id}</h2>
+              <h2 className="text-xl font-bold">Fund Loan #{selectedLoan?.loanId}</h2>
               <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-white">✕</button>
             </div>
 

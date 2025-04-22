@@ -12,31 +12,30 @@ const useGetOwnerAddress = () => {
 
   return useCallback(
     async () => {
-      
+
 
       if (!readOnlyTodoContract) {
         toast.error("Contract not found");
         return;
       }
 
-     
+
       try {
 
-        
-
-       
-          
-
-          const ownerAddress = await readOnlyTodoContract.owner();
 
 
-          if (ownerAddress){
 
-            return ownerAddress;
-            } 
 
-          toast.error("Owner's address not fetched");
-        
+
+        const ownerAddress = await readOnlyTodoContract.owner();
+
+
+        if (ownerAddress) {
+
+          return ownerAddress;
+        }
+
+
       } catch (error) {
         console.error("Error fetching owner's address", error);
 
@@ -44,10 +43,9 @@ const useGetOwnerAddress = () => {
         const decodedError = await errorDecoder.decode(error);
 
         console.error("Decoded Error:", decodedError);
-        toast.error("owner's address unable to fetch", decodedError);
       }
     },
-    [ address, chainId]
+    [address, chainId]
   );
 };
 
