@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Bell, Hexagon, Menu, X, User } from "lucide-react";
+import {  Menu, X } from "lucide-react";
+import logo from '../images/adjustLogo.png';
 
 const AppHeader = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -17,21 +18,17 @@ const AppHeader = () => {
 
           <div className="flex items-center">
             <Link to="/" className="flex items-center space-x-4">
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="bg-gradient-to-r from-blue-600 to-blue-300 p-1.5 sm:p-2 rounded-lg"
-              >
-                <Hexagon className="h-5 w-5 text-black" />
-              </motion.div>
+            
 
-              <span className="text-lg sm:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-blue-300">
-                LENDLINK
-              </span>
+               <img
+                            src={logo}
+                            alt="LumenVault Logo"
+                            className="md:h-[50px] h-[40px] w-max"
+                  />
             </Link>
           </div>
 
-          {/* Desktop Navigation */}
+       
           <div className="hidden md:flex items-center justify-center space-x-6 lg:space-x-8">
             <Link
               to="/app"
@@ -57,7 +54,7 @@ const AppHeader = () => {
 
 
           <div className="flex items-center space-x-2 sm:space-x-4">
-            {/* Hamburger Menu Button */}
+          
             <button
               className="md:hidden p-1.5 text-gray-400 hover:text-gray-200"
               onClick={toggleMenu}
@@ -77,7 +74,7 @@ const AppHeader = () => {
           </div>
         </div>
 
-        {/* Mobile Menu - Left-aligned under logo */}
+     
         <AnimatePresence>
           {isMenuOpen && (
             <motion.div
