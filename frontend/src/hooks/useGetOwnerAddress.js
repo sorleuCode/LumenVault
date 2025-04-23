@@ -22,13 +22,7 @@ const useGetOwnerAddress = () => {
 
       try {
 
-
-
-
-
-
         const ownerAddress = await readOnlyTodoContract.owner();
-
 
         if (ownerAddress) {
 

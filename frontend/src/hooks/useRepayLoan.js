@@ -62,16 +62,8 @@ const useRepayLoan = () => {
           return;
         }
 
-        console.log("Repaying loan with params:", {
-          loanId: loanId.toString(),
-          repayment: repaymenInNum.toString(),
-          contract: contract.target,
-          usdtContract: usdtContract.target,
-          chainId,
-          user: address,
-        });
-
-        // Approve USDT transfer
+      
+        // Approve mUSDT transfer
         let estimatedGas;
         try {
           estimatedGas = await usdtContract.approve.estimateGas(
@@ -86,18 +78,13 @@ const useRepayLoan = () => {
 
         const approveTx = await usdtContract.approve(lumenVaultContractAddress, bigIntRepayment, {
           gasLimit: (estimatedGas * BigInt(120)) / BigInt(100),
-          gasPrice: ethers.parseUnits("1", "gwei"), // Fallback for non-EIP-1559
+          gasPrice: ethers.parseUnits("1", "gwei"), // Fallback
         });
 
         console.log("Approval transaction sent:", { txHash: approveTx.hash });
 
         const approveReceipt = await approveTx.wait();
-        console.log("Approval receipt:", {
-          status: approveReceipt.status,
-          transactionHash: approveReceipt.transactionHash,
-          blockNumber: approveReceipt.blockNumber,
-        });
-
+        
         if (approveReceipt.status !== 1) {
           toast.error("USDT approval failed");
           return;
@@ -115,17 +102,13 @@ const useRepayLoan = () => {
 
         const repayTx = await contract.repayLoanWithReward(loanId, {
           gasLimit: (estimatedGasLoan * BigInt(120)) / BigInt(100),
-          gasPrice: ethers.parseUnits("1", "gwei"), // Fallback for non-EIP-1559
+          gasPrice: ethers.parseUnits("1", "gwei"), // Fallback
         });
 
         console.log("Repayment transaction sent:", { txHash: repayTx.hash });
 
         const repayReceipt = await repayTx.wait();
-        console.log("Repayment receipt:", {
-          status: repayReceipt.status,
-          transactionHash: repayReceipt.transactionHash,
-          blockNumber: repayReceipt.blockNumber,
-        });
+       
 
         if (repayReceipt.status === 1) {
           toast.success("Loan repaid successfully!");

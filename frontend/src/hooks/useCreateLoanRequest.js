@@ -37,16 +37,7 @@ const useCreateLoanRequest = () => {
         const dur = BigInt(duration);
         const collateral = BigInt(collateralInWei);
 
-        console.log("Sending loan request with params:", {
-          amount: amt.toString(),
-          maxInterestRate: interest.toString(),
-          duration: dur.toString(),
-          collateral: collateral.toString(),
-          contract: contract.target,
-          chainId,
-          user: address
-        });
-
+      
         let gasLimit;
 
         try {

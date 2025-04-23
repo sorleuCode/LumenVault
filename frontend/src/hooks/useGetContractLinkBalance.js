@@ -14,9 +14,6 @@ const useGetContractLinkBalance = () => {
   const usdtTokenContractAddress = import.meta.env.VITE_USDT_TOKEN_CONTRACT_ADDRESS;
   const lumenVaultContractAddress = import.meta.env.VITE_LUMEN_VAULT_CONTRACT_ADDRESS;
 
-
-
-
   const usdtTokenContract = new Contract(usdtTokenContractAddress, usdtTokenABI, readOnlyProvider);
 
   return useCallback(
@@ -30,11 +27,8 @@ const useGetContractLinkBalance = () => {
 
       try {
 
-
-
         const contractLinkBalance = await usdtTokenContract.balanceOf(String(lumenVaultContractAddress).toString());
 
-        console.log({ contractLinkBalance })
         return formatUnits(String(contractLinkBalance), 18)
 
 

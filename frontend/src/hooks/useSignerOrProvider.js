@@ -25,8 +25,7 @@ const useSignerOrProvider = () => {
       try {
         const newSigner = await provider.getSigner();
         const signerAddress = await newSigner.getAddress();
-        console.log("New signer address:", signerAddress);
-        console.log("Connected wallet address:", walletAddress);
+        
 
         if (signerAddress.toLowerCase() !== walletAddress.toLowerCase()) {
           console.warn("Signer address does not match wallet address");

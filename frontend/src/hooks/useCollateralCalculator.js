@@ -13,13 +13,10 @@ export function useCollateralCalculator() {
 
       try {
         const amountInWei = parseUnits(usdtAmount.toString(), 18);
-        console.log("Input amountInWei:", amountInWei.toString());
 
         const collateralWei = await contract.getRequiredCollateralAmount(amountInWei);
-        console.log("Raw collateralWei:", collateralWei.toString());
 
         const collateralFormatted = formatUnits(collateralWei, 18); // Assuming PTT has 18 decimals
-        console.log("Formatted collateral:", collateralFormatted);
 
         return collateralFormatted;
       } catch (error) {

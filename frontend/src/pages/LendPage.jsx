@@ -36,7 +36,6 @@ const LendingPage = () => {
     if (loading) return;
     setLoading(true);
     if (selectedLoan) {
-      console.log({selectedLoan})
       try {
         const result = await handleFundLoan(selectedLoan.loanId, parseUnits(Math.round(Number(selectedLoan.amount)).toString(), 18));
         if (result) {

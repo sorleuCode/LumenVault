@@ -48,9 +48,6 @@ const useFundLoan = () => {
 
         const balance = await usdtContract.balanceOf(address);
 
-        console.log({loanAmount})
-        console.log({balance})
-
        
 
         if (balance < loanAmount) {
@@ -87,7 +84,6 @@ const useFundLoan = () => {
           return;
         }
 
-        // Fund the loan
         let estimatedGasLoan;
         try {
           estimatedGasLoan = await contract.fundLoan.estimateGas(loanId);

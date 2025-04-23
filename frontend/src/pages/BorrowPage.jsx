@@ -85,12 +85,10 @@ const BorrowPage = () => {
     if (formData.date) {
       const timeInSeconds = calculateTimeDifferenceInSeconds(formData.date);
       setFormData((prev) => ({ ...prev, duration: timeInSeconds }));
-      console.log({ timeInSeconds });
     }
   }, [formData.date]);
 
   const calculateTimeDifferenceInSeconds = (selectedDate) => {
-    console.log({ selectedDate });
     const currentDate = new Date();
     const selectedDateObj = new Date(selectedDate);
     const timeDifferenceInMilliseconds = selectedDateObj - currentDate;
@@ -100,7 +98,6 @@ const BorrowPage = () => {
   useEffect(() => {
     if (marketError) {
       console.error("Market stats error:", marketError);
-      toast.error(`Failed to fetch market statistics: ${marketError.message}`);
     }
   }, [marketError]);
 
@@ -164,7 +161,6 @@ const BorrowPage = () => {
 
     try {
       setLoadingLoans((prev) => ({ ...prev, [loanId]: true }));
-      console.log({ repayment2: repayment });
 
       const result = await repayLoan(loanId, repayment);
       if (result) {

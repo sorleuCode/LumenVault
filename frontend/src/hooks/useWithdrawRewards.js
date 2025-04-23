@@ -25,9 +25,6 @@ const useWithdrawRewards = () => {
     
       try {
 
-        
-
-       
           const estimatedGasLoan = await contract.withdrawRewards.estimateGas(withdrawalAddress);
 
           if (!estimatedGasLoan) {

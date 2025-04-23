@@ -18,7 +18,7 @@ const DashboardContent = () => {
   const [totalValue, setTotalValue] = useState(0);
   const [loanPayments, setLoanPayments] = useState({});
   const [requiredCollateral, setRequiredCollateral] = useState({});
-  const [isLoading, setIsLoading] = useState(true);
+  const [ setIsLoading] = useState(true);
   const [withdrawAddress, setWithdrawAddress] = useState("");
   const [ownerAddress, setOwnerAddress] = useState(null);
   const [contractBalance, setContractBalance] = useState("0");
@@ -72,6 +72,7 @@ const DashboardContent = () => {
   }, [contractBalance, ownerAddress]);
 
   useEffect(() => {
+
     const fetchData = async () => {
       try {
         const active = loanRequests?.filter((loan) => loan.isActive).length;
@@ -86,7 +87,6 @@ const DashboardContent = () => {
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
-        setIsLoading(false);
       }
     };
 
