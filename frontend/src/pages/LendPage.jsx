@@ -51,7 +51,7 @@ const LendingPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 text-white p-8">
+    <div className="min-h-screen bg-black text-white p-8">
       <div className="max-w-7xl mx-auto">
         {/* Header Section */}
         <div className="mb-12">
