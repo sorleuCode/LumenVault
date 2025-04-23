@@ -105,7 +105,6 @@ const DeFiLanding = () => {
               {[
                 { Icon: Lock, text: "Secure", color: "text-green-400" },
                 { Icon: Zap, text: "Fast", color: "text-yellow-400" },
-                { Icon: Users, text: "P2P", color: "text-orange-400" }
               ].map(({ Icon, text, color }) => (
                 <motion.div 
                   key={text}
