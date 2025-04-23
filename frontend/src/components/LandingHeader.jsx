@@ -16,7 +16,8 @@ const LandingHeader = () => {
             <img
               src={logo}
               alt="LumenVault Logo"
-              className="md:h-[50px] h-[40px] w-max"
+              className="md:h-[40px] h-[40px] md:w-[230px]"
+
             />
           </Link>
           <span className='flex-1'></span>

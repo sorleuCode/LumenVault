@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
-import {  Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import logo from '../images/redesignLogo.png';
 
 const AppHeader = () => {
@@ -18,17 +18,17 @@ const AppHeader = () => {
 
           <div className="flex items-center">
             <Link to="/" className="flex items-center space-x-4">
-            
 
-               <img
-                            src={logo}
-                            alt="LumenVault Logo"
-                            className="md:h-[50px] h-[40px] w-max"
-                  />
+
+              <img
+                src={logo}
+                alt="LumenVault Logo"
+                className="md:h-[40px] h-[40px] md:w-[230px]"
+              />
             </Link>
           </div>
 
-       
+
           <div className="hidden md:flex items-center justify-center space-x-6 lg:space-x-8">
             <Link
               to="/app"
@@ -49,12 +49,12 @@ const AppHeader = () => {
               Borrow
             </Link>
 
-            
+
           </div>
 
 
           <div className="flex items-center space-x-2 sm:space-x-4">
-          
+
             <button
               className="md:hidden p-1.5 text-gray-400 hover:text-gray-200"
               onClick={toggleMenu}
@@ -74,7 +74,7 @@ const AppHeader = () => {
           </div>
         </div>
 
-     
+
         <AnimatePresence>
           {isMenuOpen && (
             <motion.div
@@ -86,9 +86,9 @@ const AppHeader = () => {
               <div className="py-2 pl-6">
                 <div className="flex flex-col space-y-3">
 
-                <div className="ml-o  flex items-center">
+                  <div className="ml-o  flex items-center">
                     <div className="scale-90 sm:scale-100">
-                      <appkit-button/>
+                      <appkit-button />
                     </div>
                   </div>
                   <Link
@@ -113,7 +113,7 @@ const AppHeader = () => {
                     Borrow
                   </Link>
 
-                  
+
                 </div>
               </div>
             </motion.div>

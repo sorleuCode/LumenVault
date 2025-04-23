@@ -36,7 +36,8 @@ const Footer = () => {
                <img
               src={logo}
               alt="LumenVault Logo"
-              className="h-[50px] w-max"
+              className="md:h-[40px] h-[40px] md:w-[230px]"
+
             />
 
             </div>
