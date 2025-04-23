@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Twitter, Github, Linkedin, Facebook, Hexagon } from 'lucide-react';
-import logo from '../images/adjustLogo.png';
+import logo from '../images/redesignLogo.png';
 
 const Footer = () => {
   const socialLinks = [
