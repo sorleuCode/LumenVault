@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Twitter, Github, Linkedin, Facebook, Hexagon } from 'lucide-react';
+import logo from '../images/adjustLogo.png';
 
 const Footer = () => {
   const socialLinks = [
@@ -26,12 +27,18 @@ const Footer = () => {
             transition={{ duration: 0.6 }}
           >
             <div className="flex items-center space-x-2 mb-4">
-              <div className="bg-gradient-to-r from-blue-600 to-blue-300 p-2 rounded-lg">
+              {/* <div className="bg-gradient-to-r from-blue-600 to-blue-300 p-2 rounded-lg">
                 <Hexagon className="h-6 w-6 text-black" />
-              </div>
-              <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-blue-300">
+              </div> */}
+              {/* <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-blue-300">
                 LENDLINK
-              </span>
+              </span> */}
+               <img
+              src={logo}
+              alt="LumenVault Logo"
+              className="h-[50px] w-max"
+            />
+
             </div>
             <p className="text-gray-400">
               Empowering financial inclusion through blockchain technology.
