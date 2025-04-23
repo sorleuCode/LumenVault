@@ -200,7 +200,7 @@ const BorrowPage = () => {
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
-        <h1 className="text-4xl md:text-5xl font-bold text-center mb-8">
+        <h1 className="text-base md:text-lg xl:text-4xl font-bold text-center mb-8">
           <span className="bg-gradient-to-r from-blue-500 to-blue-300 bg-clip-text text-transparent">Borrow</span>{" "}
           Assets
         </h1>
