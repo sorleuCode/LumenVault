@@ -19,8 +19,8 @@ describe("LoanManager", function () {
     [owner, borrower, lender] = await ethers.getSigners();
 
     // Deploy MockUSDT
-    const MockUSDT = await ethers.getContractFactory("MockUsdt");
-    usdtToken = await MockUSDT.deploy();
+    const MockUsdt = await ethers.getContractFactory("MockUsdt");
+    usdtToken = await MockUsdt.deploy();
     await usdtToken.waitForDeployment();
 
     // Deploy LoanManager
@@ -123,7 +123,7 @@ describe("LoanManager", function () {
       loanId = 1;
 
       // Mint USDT to lender
-      await usdtToken.mint(lender.address, parseUnits("10000", 18));
+      await usdtToken.connect(lender).mint();
     });
 
     it("should allow funding a loan", async function () {
@@ -164,13 +164,13 @@ describe("LoanManager", function () {
         });
       loanId = 1;
 
-      await usdtToken.mint(lender.address, parseUnits("10000", 18));
+      await usdtToken.connect(lender).mint();
       await usdtToken
         .connect(lender)
         .approve(await loanManager.getAddress(), loanAmount);
       await loanManager.connect(lender).fundLoan(loanId);
 
-      await usdtToken.mint(borrower.address, parseUnits("2000", 18));
+      await usdtToken.connect(borrower).mint();
       await usdtToken
         .connect(borrower)
         .approve(await loanManager.getAddress(), parseUnits("2000", 18));
@@ -232,7 +232,7 @@ describe("LoanManager", function () {
         });
       loanId = 1;
 
-      await usdtToken.mint( lender.address, parseUnits("10000", 18));
+      await usdtToken.connect(lender).mint();
       await usdtToken
         .connect(lender)
         .approve(await loanManager.getAddress(), loanAmount);
@@ -274,7 +274,7 @@ describe("LoanManager", function () {
 
     it("should allow owner to withdraw rewards", async function () {
       // Fund contract with some USDT
-      await usdtToken.mint(await loanManager.getAddress(), parseUnits("100", 18));
+      await usdtToken.connect(owner).mint();
 
       const initialBalance = await usdtToken.balanceOf(owner.address);
       await expect(loanManager.connect(owner).withdrawRewards(owner.address))
