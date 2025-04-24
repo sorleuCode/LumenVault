@@ -36,9 +36,9 @@ const networks = [pharosDevnet];
 
 // 3. Create a metadata object - optional
 const metadata = {
-  name: "My Website",
-  description: "My Website description",
-  url: "https://mywebsite.com", // origin must match your domain & subdomain
+  name: "Lumenvault",
+  description: "Decentralized micro-loan",
+  url: "https://lumenvault.vercel.app", 
   icons: ["https://avatars.mywebsite.com/"],
 };
 

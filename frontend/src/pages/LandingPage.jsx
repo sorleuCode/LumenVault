@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { motion, useAnimation } from 'framer-motion';
 import { 
-  ArrowRight, Lock, Zap, Users, 
+  ArrowRight, Lock, Zap, 
   Coins, Wallet, Shield, LineChart
 } from 'lucide-react';
 
