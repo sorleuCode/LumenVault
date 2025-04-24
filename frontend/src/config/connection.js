@@ -13,8 +13,8 @@ const pharosDevnet = defineChain({
   name: "Pharos Devnet",
   nativeCurrency: {
     decimals: 18,
-    name: "PPT",
-    symbol: "PPT",
+    name: "Pharos Test Token",
+    symbol: "PTT",
   },
   rpcUrls: {
     default: {
