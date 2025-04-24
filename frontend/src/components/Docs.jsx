@@ -35,20 +35,20 @@ const ScrollButton = () => {
   };
 
   return (
-    <div className="fixed right-8 bottom-8 flex flex-col gap-2">
+    <div className="fixed right-4 sm:right-8 bottom-4 sm:bottom-8 flex flex-col gap-2">
       <button
         onClick={scrollToTop}
         className={`${
           visible ? "opacity-100" : "opacity-0"
-        } bg-gray-800 hover:bg-gray-700 text-white p-3 rounded-full transition-all duration-300`}
+        } bg-gray-800 hover:bg-gray-700 text-white p-2 sm:p-3 rounded-full transition-all duration-300`}
       >
-        <ChevronUpIcon className="h-6 w-6" />
+        <ChevronUpIcon className="h-5 w-5 sm:h-6 sm:w-6" />
       </button>
       <button
         onClick={scrollToBottom}
-        className="bg-gray-800 hover:bg-gray-700 text-white p-3 rounded-full"
+        className="bg-gray-800 hover:bg-gray-700 text-white p-2 sm:p-3 rounded-full"
       >
-        <ChevronDown className="h-6 w-6" />
+        <ChevronDown className="h-5 w-5 sm:h-6 sm:w-6" />
       </button>
     </div>
   );
@@ -65,7 +65,7 @@ const NavItem = ({
   return (
     <div className="text-gray-400">
       <div
-        className="flex items-center cursor-pointer py-2 px-4 hover:text-gray-200 transition-colors duration-150 ease-in-out"
+        className="flex items-center cursor-pointer py-2 px-3 sm:px-4 hover:text-gray-200 transition-colors duration-150 ease-in-out"
         onClick={children ? onToggle : () => onItemClick(title)}
       >
         {children && (
@@ -78,12 +78,12 @@ const NavItem = ({
           </span>
         )}
         <span
-          className={`${selectedItem === title ? "text-white" : ""} text-sm`}
+          className={`${selectedItem === title ? "text-white" : ""} text-sm sm:text-base`}
         >
           {title}
         </span>
       </div>
-      {isOpen && children && <div className="ml-4">{children}</div>}
+      {isOpen && children && <div className="ml-3 sm:ml-4">{children}</div>}
     </div>
   );
 };
@@ -103,6 +103,8 @@ const Documentation = () => {
     "Core Features",
     "Supported Assets",
     "Long-term Goals",
+    "Mock Token & Test Assets",
+    "Claiming Test Tokens",
     "How to Join",
     "Managing Lending Pools",
     "Creating a Borrow Order",
@@ -142,7 +144,7 @@ const Documentation = () => {
       ].includes(title)
     ) {
       setActiveSection("Introduction");
-    } else if (["How to Join"].includes(title)) {
+    } else if (["Mock Token & Test Assets", "Claiming Test Tokens", "How to Join"].includes(title)) {
       setActiveSection("Getting Started");
     } else if (["Managing Lending Pools"].includes(title)) {
       setActiveSection("Lending on LUMENVAULT");
@@ -163,9 +165,9 @@ const Documentation = () => {
   return (
     <div className="flex flex-col min-h-screen bg-[#121212]">
       <div className="flex pt-14">
-        <div className="fixed w-64 top-14 bottom-0 bg-[#121212] border-r border-gray-800 md:block hidden">
+        <div className="fixed w-56 sm:w-64 top-14 bottom-0 bg-[#121212] border-r border-gray-800 md:block hidden">
           <div className="h-full overflow-y-auto">
-            <div className="py-6">
+            <div className="py-4 sm:py-6">
               {/* Introduction Section */}
               <NavItem
                 title="Introduction"
@@ -206,18 +208,23 @@ const Documentation = () => {
                   onToggle={() =>
                     setOpenPlatformOverview(!openPlatformOverview)
                   }
-                >               
+                >
                   <NavItem
                     title="Mock Token & Test Assets"
                     onItemClick={handleItemClick}
                     selectedItem={selectedItem}
                   />
                   <NavItem
-                    title="How to Join"
+                    title="Claiming Test Tokens"
                     onItemClick={handleItemClick}
                     selectedItem={selectedItem}
                   />
                 </NavItem>
+                <NavItem
+                  title="How to Join"
+                  onItemClick={handleItemClick}
+                  selectedItem={selectedItem}
+                />
               </NavItem>
 
               {/* Lending on LUMENVAULT */}
@@ -268,8 +275,6 @@ const Documentation = () => {
               {/* Contact and Support */}
               <NavItem
                 title="Contact and Support"
-                isOpen={openGettingStarted}
-                onToggle={() => setOpenGettingStarted(!openGettingStarted)}
                 onItemClick={handleItemClick}
                 selectedItem={selectedItem}
               />
@@ -278,20 +283,20 @@ const Documentation = () => {
         </div>
 
         {/* Main content area */}
-        <div className="md:ml-64 flex-1">
-          <div className="max-w-4xl mx-auto p-8">
+        <div className="md:ml-56 sm:md:ml-64 flex-1">
+          <div className="max-w-4xl mx-auto p-4 sm:p-8">
             <div className="space-y-6">
               <div className="text-gray-400 text-sm uppercase tracking-wider mb-4">
                 {activeSection}
               </div>
-              <h1 className="text-4xl font-bold text-white mb-8">
+              <h1 className="text-3xl sm:text-4xl font-bold text-white mb-6 sm:mb-8">
                 {selectedItem}
               </h1>
 
               {/* Content for each selected item */}
               {selectedItem === "Overview" && (
                 <div className="space-y-6">
-                  <p className="text-gray-300 leading-relaxed">
+                  <p className="text-gray-300 text-sm sm:text-base leading-relaxed">
                     <strong>LUMENVAULT</strong> is a decentralized platform
                     leveraging blockchain technology to revolutionize
                     small-scale lending. Designed for individuals and
@@ -309,7 +314,7 @@ const Documentation = () => {
 
               {selectedItem === "Core Features" && (
                 <div className="space-y-6">
-                  <ul className="list-disc pl-5 text-gray-300 leading-relaxed space-y-4">
+                  <ul className="list-disc pl-5 text-gray-300 text-sm sm:text-base leading-relaxed space-y-4">
                     <li>
                       <b>Collateralized Loans with PTT:</b> Borrowers can
                       request loans by depositing (PTT) as collateral.
@@ -356,9 +361,9 @@ const Documentation = () => {
 
               {selectedItem === "Supported Assets" && (
                 <div className="space-y-6">
-                  <p>
+                  <p className="text-gray-300 text-sm sm:text-base leading-relaxed">
                     Currently, <strong>LUMENVAULT</strong> operates on the{" "}
-                    <strong>pharosDevnet</strong> network, supporting{" "}
+                    <strong>Pharos Devnet</strong> network, supporting{" "}
                     <strong>mUSDT and PTT</strong> as the primary assets. PTT is
                     used as collateral for loans, while mUSDT is used as the loan
                     currency. Plans to introduce additional assets (e.g., other
@@ -371,7 +376,7 @@ const Documentation = () => {
 
               {selectedItem === "Long-term Goals" && (
                 <div className="space-y-6">
-                  <p>
+                  <p className="text-gray-300 text-sm sm:text-base leading-relaxed">
                     One of the long-term objectives of{" "}
                     <strong>LUMENVAULT</strong> is to build a decentralized
                     credit reputation system using on-chain loan history and
@@ -384,20 +389,71 @@ const Documentation = () => {
 
               {selectedItem === "Mock Token & Test Assets" && (
                 <div className="space-y-6">
-                  <p>To interact with the protocol in the test environment, you’ll need access to the mock tokens:</p>
-                  <p><b>mUSDT</b> is a erc20 mock version of the USDT token deployed by the team. It is intended for development and testing purposes only. And also,iIt serves as the lending token. The  token has this contract address: 0xb88877a121B0e96c2c794dd68c8D507D584a64c3</p>
+                  <p className="text-gray-300 text-sm sm:text-base leading-relaxed">
+                    To interact with the protocol in the test environment, you’ll need access to the mock tokens:
+                  </p>
+                  <ul className="list-disc pl-5 text-gray-300 text-sm sm:text-base leading-relaxed space-y-4">
+                    <li>
+                      <b>mUSDT:</b> An ERC-20 mock version of the USDT token deployed by the team for development and testing purposes. It serves as the lending token. The token has the following contract address: <span className="break-all">0x4139F0ccD676061C6D78Fb2D20eC192096957dcf</span>.
+                    </li>
+                    <li>
+                      <b>PTT:</b> The native token used as collateral for securing loans on the platform.
+                    </li>
+                  </ul>
+                </div>
+              )}
+
+              {selectedItem === "Claiming Test Tokens" && (
+                <div className="space-y-6">
+                  <p className="text-gray-300 text-sm sm:text-base leading-relaxed">
+                    The <strong>Claim Faucet</strong> feature allows non-owner users to obtain mUSDT test tokens on the Pharos Devnet for interacting with <strong>LUMENVAULT</strong>. This is essential for testing lending and borrowing functionalities without using real funds.
+                  </p>
+                  <h2 className="text-xl sm:text-2xl font-bold text-white mb-4">
+                    How to Claim mUSDT Test Tokens
+                  </h2>
+                  <ol className="list-decimal pl-5 text-gray-300 text-sm sm:text-base leading-relaxed space-y-4">
+                    <li>
+                      <b>Access the Dashboard:</b> Log in to the LUMENVAULT platform with your Ethereum-compatible wallet (e.g., MetaMask) connected to the Pharos Devnet (chain ID 50002).
+                    </li>
+                    <li>
+                      <b>Locate the Claim Faucet Button:</b> If you are not the platform owner, a <strong>Claim Faucet</strong> button will be visible on the dashboard. This button is exclusive to non-owners to facilitate testing.
+                    </li>
+                    <li>
+                      <b>Open the Claim Modal:</b> Click the <strong>Claim Faucet</strong> button to open a modal displaying the mUSDT token details:
+                      <ul className="list-disc pl-5 mt-2 space-y-2">
+                        <li><strong>Token Symbol:</strong> mUSDT</li>
+                        <li><strong>Contract Address:</strong> <span className="break-all">0x4139F0ccD676061C6D78Fb2D20eC192096957dcf</span></li>
+                        <li><strong>Decimals:</strong> 18</li>
+                      </ul>
+                    </li>
+                    <li>
+                      <b>Claim Tokens:</b> In the modal, click the <strong>Claim Tokens</strong> button. This triggers a transaction to mint mUSDT tokens to your wallet. A loading spinner will appear during the transaction, and you’ll receive a confirmation toast (“mUSDT claimed successfully”) upon completion.
+                    </li>
+                    <li>
+                      <b>Add token to wallet:</b> Import the mUSDT token into your wallet e.g MetaMask,  using its contract address.
+                    </li>
+                    <li>
+                      <b>Use Tokens:</b> The claimed mUSDT tokens can be used to fund loans as a lender or repay loans as a borrower in the test environment.
+                    </li>
+                  </ol>
+                  <p className="text-gray-300 text-sm sm:text-base leading-relaxed">
+                    <strong>Note:</strong> The Claim Faucet is only available on the Pharos Devnet and is intended for testing purposes. Ensure your wallet is connected to the correct network (chain ID 12345) before claiming tokens.
+                  </p>
                 </div>
               )}
 
               {selectedItem === "How to Join" && (
                 <div className="space-y-6">
-                  <ol className="list-decimal pl-5 text-gray-300 leading-relaxed space-y-4">
+                  <ol className="list-decimal pl-5 text-gray-300 text-sm sm:text-base leading-relaxed space-y-4">
                     <li>
                       <b>Connect Your Wallet:</b> Start by connecting your
                       Ethereum-compatible wallet (e.g., MetaMask) to the
                       platform. This wallet will be used for secure
                       transactions, managing funds, and interacting with the
                       smart contract.
+                    </li>
+                    <li>
+                      <b>Claim Test Tokens (Optional):</b> For testing, non-owners can use the <strong>Claim Faucet</strong> feature to obtain mUSDT tokens. See the <strong>Claiming Test Tokens</strong> section for details.
                     </li>
                     <li>
                       <b>Choose Your Role:</b> Decide whether you want to act as
@@ -414,7 +470,7 @@ const Documentation = () => {
                     </li>
                     <li>
                       <b>Request or Fund a Loan:</b>
-                      <ul className="list-disc pl-5 px-6 text-gray-300 leading-relaxed space-y-4">
+                      <ul className="list-disc pl-5 text-gray-300 text-sm sm:text-base leading-relaxed space-y-4">
                         <li>
                           Borrowers: Submit a loan request by specifying the
                           loan amount, maximum interest rate, and repayment
@@ -423,14 +479,14 @@ const Documentation = () => {
                         </li>
                         <li>
                           Lenders: Browse available loan requests or create your
-                          own lending terms. Fund loans using (mUSDT)
+                          own lending terms. Fund loans using mUSDT
                           tokens to earn interest.
                         </li>
                       </ul>
                     </li>
                     <li>
                       <b>Repay or Liquidate:</b>
-                      <ul className="list-disc pl-5 px-6 text-gray-300 leading-relaxed space-y-4">
+                      <ul className="list-disc pl-5 text-gray-300 text-sm sm:text-base leading-relaxed space-y-4">
                         <li>
                           Borrowers: Repay your loan (with interest) by the due
                           date to reclaim your collateral. Timely repayments may
@@ -449,7 +505,7 @@ const Documentation = () => {
 
               {selectedItem === "Managing Lending Pools" && (
                 <div className="space-y-6">
-                  <ol className="list-decimal pl-5 text-gray-300 leading-relaxed space-y-4">
+                  <ol className="list-decimal pl-5 text-gray-300 text-sm sm:text-base leading-relaxed space-y-4">
                     <li>
                       <b>Monitor Repayments:</b> As borrowers repay their loans,
                       the platform will automatically distribute repayments
@@ -469,7 +525,7 @@ const Documentation = () => {
 
               {selectedItem === "Creating a Borrow Order" && (
                 <div className="space-y-6">
-                  <ol className="list-decimal pl-5 text-gray-300 leading-relaxed space-y-4">
+                  <ol className="list-decimal pl-5 text-gray-300 text-sm sm:text-base leading-relaxed space-y-4">
                     <li>
                       <b>Connect Your Wallet:</b> Start by connecting your
                       Ethereum-compatible wallet (e.g., MetaMask) to the
@@ -478,7 +534,7 @@ const Documentation = () => {
                       smart contract.
                     </li>
                     <li>
-                      <b>Deposit Collateral:</b> Deposit (PTT) as
+                      <b>Deposit Collateral:</b> Deposit PTT as
                       collateral to secure your loan. The required collateral
                       amount is determined based on your loan amount and the
                       platform’s collateralization ratio.
@@ -498,18 +554,18 @@ const Documentation = () => {
 
               {selectedItem === "Depositing Collateral" && (
                 <div className="space-y-6">
-                  <p>
+                  <p className="text-gray-300 text-sm sm:text-base leading-relaxed">
                     <strong>LUMENVAULT</strong> requires borrowers to deposit
                     collateral to secure their loans, ensuring lender protection
                     in case of non-repayment.
                   </p>
-                  <ul className="list-disc pl-5 text-gray-300 leading-relaxed space-y-4">
+                  <ul className="list-disc pl-5 text-gray-300 text-sm sm:text-base leading-relaxed space-y-4">
                     <li>
                       <strong>Supported Collateral:</strong> PTT (for
                       collateral deposit).
                     </li>
                     <li>
-                      <strong> Collateral Deposit Process:</strong> After
+                      <strong>Collateral Deposit Process:</strong> After
                       creating a borrow order, deposit the required collateral
                       via your Smart Wallet. The platform automatically
                       calculates the required collateral based on the loan
@@ -522,33 +578,34 @@ const Documentation = () => {
 
               {selectedItem === "Loan-to-Value (LTV) Ratios" && (
                 <div className="space-y-6">
-                  <h2>
+                  <h2 className="text-xl sm:text-2xl font-bold text-white mb-4">
                     The Loan-to-Value (LTV) ratio determines the amount you can
                     borrow based on the value of the collateral you provide.
                   </h2>
-                  <h2>
+                  <h2 className="text-xl sm:text-2xl font-bold text-white mb-4">
                     Collateralization Ratio: Currently set at 120%. This means
                     borrowers must deposit collateral worth 120% of the loan
                     amount.
                   </h2>
-
-                  <ul className="list-disc pl-5 text-gray-300 leading-relaxed space-y-4">
+                  <ul className="list-disc pl-5 text-gray-300 text-sm sm:text-base leading-relaxed space-y-4">
                     <li>
                       For example, if you request a loan of 1,000 mUSDT tokens
                       (worth $1,000), you will need to deposit at least $1,200
-                      worth of collateral (PTT). Maintaining a Healthy LTV
-                    </li>
-                    <h1 className="text-2xl font-bold text-white mb-8">
-                      Maintaining a Healthy LTV
-                    </h1>
-                    <li>
-                      <stong> Liquidation Threshold:</stong> If the value of
-                      your collateral falls below 110% of the loan amount, your
-                      loan may be liquidated to protect the lender.
+                      worth of collateral (PTT).
                     </li>
                     <li>
-                      To avoid liquidation, ensure the value of your collateral
-                      remains sufficient to cover the loan amount.
+                      <strong>Maintaining a Healthy LTV:</strong>
+                      <ul className="list-disc pl-5 mt-2 space-y-2">
+                        <li>
+                          <strong>Liquidation Threshold:</strong> If the value of
+                          your collateral falls below 110% of the loan amount, your
+                          loan may be liquidated to protect the lender.
+                        </li>
+                        <li>
+                          To avoid liquidation, ensure the value of your collateral
+                          remains sufficient to cover the loan amount.
+                        </li>
+                      </ul>
                     </li>
                   </ul>
                 </div>
@@ -556,18 +613,17 @@ const Documentation = () => {
 
               {selectedItem === "Repayment Process" && (
                 <div className="space-y-6">
-                  <p>
+                  <p className="text-gray-300 text-sm sm:text-base leading-relaxed">
                     Repaying your loan on <strong>LUMENVAULT</strong> is simple:
                   </p>
-
-                  <ul className="list-disc pl-5 text-gray-300 leading-relaxed space-y-4">
+                  <ul className="list-disc pl-5 text-gray-300 text-sm sm:text-base leading-relaxed space-y-4">
                     <li>
-                      Manual Repayment: You can repay the loan early, including
+                      <strong>Manual Repayment:</strong> You can repay the loan early, including
                       partial repayments, to reduce interest or avoid
                       liquidation risks. Repayments are made in mUSDT.
                     </li>
                     <li>
-                      Collateral Return: Once your loan is fully repaid,
+                      <strong>Collateral Return:</strong> Once your loan is fully repaid,
                       including the principal and interest, your collateral
                       (PTT) will be automatically returned. The collateral can
                       then be used for future loans, or withdrawn.
@@ -578,14 +634,14 @@ const Documentation = () => {
 
               {selectedItem === "Contact and Support" && (
                 <div className="space-y-6">
-                  <p>
+                  <p className="text-gray-300 text-sm sm:text-base leading-relaxed">
                     Information on how to contact LUMENVAULT support team and
                     engage with the community for assistance and discussions.
                   </p>
-                  <h3 className="text-2xl font-bold text-white mb-8">
+                  <h3 className="text-xl sm:text-2xl font-bold text-white mb-4">
                     Support Channels
                   </h3>
-                  <p>
+                  <p className="text-gray-300 text-sm sm:text-base leading-relaxed">
                     If you need assistance or have questions about using the
                     LUMENVAULT platform, our support team is here to help.
                     Whether you have technical issues, need guidance on lending
@@ -593,10 +649,11 @@ const Documentation = () => {
                     our dedicated team is available to provide the support you
                     need.
                   </p>
-
-                  <li>
-                    <strong>Support:</strong> lumenvault@gmail.com
-                  </li>
+                  <ul className="list-disc pl-5 text-gray-300 text-sm sm:text-base leading-relaxed space-y-4">
+                    <li>
+                      <strong>Support Email:</strong> lumenvault@gmail.com
+                    </li>
+                  </ul>
                 </div>
               )}
 
@@ -604,7 +661,7 @@ const Documentation = () => {
                 <button
                   onClick={handlePrevious}
                   disabled={isFirstItem}
-                  className={`flex items-center ${
+                  className={`flex items-center text-sm sm:text-base ${
                     isFirstItem
                       ? "text-gray-600 cursor-not-allowed"
                       : "text-gray-400 hover:text-white"
@@ -616,7 +673,7 @@ const Documentation = () => {
                 <button
                   onClick={handleNext}
                   disabled={isLastItem}
-                  className={`flex items-center ${
+                  className={`flex items-center text-sm sm:text-base ${
                     isLastItem
                       ? "text-gray-600 cursor-not-allowed"
                       : "text-gray-400 hover:text-white"
