@@ -339,7 +339,7 @@ const DashboardContent = () => {
                         <p className="font-medium text-xs sm:text-sm"><span className="text-gray-400">Interest: {loan.maxInterestRate}%</span></p>
                         {requiredCollateral[loan.loanId] && (
                           <p className="text-xs sm:text-sm text-gray-400">
-                            Required Collateral: {Number(requiredCollateral[loan.loanId]).toFixed(3)} PHS
+                            Required Collateral: {Number(requiredCollateral[loan.loanId]).toFixed(3)} PTT
                           </p>
                         )}
                       </div>
