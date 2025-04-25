@@ -3,7 +3,7 @@ import useContractInstance from "./useContractInstance";
 import { useAppKitAccount, useAppKitNetwork } from "@reown/appkit/react";
 import { toast } from "react-toastify";
 import { ErrorDecoder } from "ethers-decode-error";
-import { Contract } from "ethers"; // Remove BigNumber import
+import { Contract, ethers } from "ethers"; // Remove BigNumber import
 import usdtTokenABI from "../ABI/usdtToken.json";
 import useSignerOrProvider from "./useSignerOrProvider";
 
@@ -19,11 +19,13 @@ const useFundLoan = () => {
   const usdtContract = new Contract(usdtTokenContractAddress, usdtTokenABI, signer);
 
   return useCallback(
-    async (loanId, loanAmount) => {
+    async (loanId) => {
       if (!loanId || isNaN(loanId)) {
         toast.error("Invalid loan ID");
         return;
       }
+
+
 
 
       if (!address) {
@@ -37,8 +39,11 @@ const useFundLoan = () => {
       }
 
       try {
-        
 
+
+        const loan = await contract.loansCore(loanId);
+        const amountWei = loan.amount;
+        
         const status = await contract.loansStatus(loanId);
 
         if (status.active) {
@@ -50,7 +55,7 @@ const useFundLoan = () => {
 
        
 
-        if (balance < loanAmount) {
+        if (balance < amountWei) {
           toast.error("Insufficient token balance");
           return;
         }
@@ -58,10 +63,10 @@ const useFundLoan = () => {
       
         const approveGas = await usdtContract.approve.estimateGas(
           lumenVaultContractAddress,
-          loanAmount 
+          amountWei 
         );
 
-        const approveTx = await usdtContract.approve(lumenVaultContractAddress, loanAmount , {
+        const approveTx = await usdtContract.approve(lumenVaultContractAddress, amountWei , {
           gasLimit: (approveGas * BigInt(120)) / BigInt(100),
         });
 
@@ -79,7 +84,7 @@ const useFundLoan = () => {
         const allowance = await usdtContract.allowance(address, lumenVaultContractAddress);
 
 
-        if (allowance < loanAmount) {
+        if (allowance < amountWei) {
           toast.error("Insufficient token allowance");
           return;
         }
@@ -91,7 +96,7 @@ const useFundLoan = () => {
           const decoder = ErrorDecoder.create();
           const decoded = await decoder.decode(gasEstimationError);
           console.error("Gas estimation error:", decoded);
-          toast.error(decoded?.message || "Gas estimation failed for loan funding");
+          toast.error(decoded || "Gas estimation failed for loan funding");
           return;
         }
 

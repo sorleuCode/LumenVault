@@ -37,7 +37,7 @@ const LendingPage = () => {
     setLoading(true);
     if (selectedLoan) {
       try {
-        const result = await handleFundLoan(selectedLoan.loanId, parseUnits(Math.round(Number(selectedLoan.amount)).toString(), 18));
+        const result = await handleFundLoan(selectedLoan.loanId);
         if (result) {
           setLoading(false);
           setIsModalOpen(false);

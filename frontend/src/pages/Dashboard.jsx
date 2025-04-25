@@ -66,7 +66,6 @@ const DashboardContent = () => {
       setOwnerAddress(ownerAddress);
 
       const balance = await getContractBalance();
-      console.log({ ContractBalance: balance });
 
       setContractBalance(Number(balance));
     };

@@ -134,7 +134,8 @@ const BorrowPage = () => {
 
     try {
       setSubmitLoading(true);
-      const amountInWei = parseUnits(formData.amount.toString(), 18);
+      const amountInWei = parseUnits(formData.amount, 18);
+
       const interestRateScaled = Math.floor(formData.maxInterestRate * 100);
 
       const collateralInWei = parseEther(collateralAmount.toString());
