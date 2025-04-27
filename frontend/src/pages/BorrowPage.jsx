@@ -213,7 +213,7 @@ const BorrowPage = () => {
             </div>
           ) : (
             <>
-              {renderStatCard("Total Liquidity", `${totalLiquidity} mUSDT
+              {renderStatCard("Total Liquidity", `${Number(totalLiquidity).toFixed(2)} mUSDT
 `, "💧", marketLoading)}
               {renderStatCard("Average Interest", `${avgInterestRate}%`, "📈", marketLoading)}
               {renderStatCard("My active Loans", activeLoans, "🔄", marketLoading)}
